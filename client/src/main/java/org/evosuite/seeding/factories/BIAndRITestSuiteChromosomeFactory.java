@@ -77,6 +77,7 @@ public class BIAndRITestSuiteChromosomeFactory implements
 		if (chrom == null){
 			chrom = defaultFactory.getChromosome();
 		}
+		
 		return chrom;
 	}
 }

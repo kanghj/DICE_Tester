@@ -50,6 +50,8 @@ public class ExecutionResult implements Cloneable {
 	 * */
 	public Map<Integer, Boolean> explicitExceptions = new HashMap<Integer, Boolean>();
 
+	public boolean hasLeak;
+	
 	/** Trace recorded during execution */
 	protected ExecutionTrace trace;
 

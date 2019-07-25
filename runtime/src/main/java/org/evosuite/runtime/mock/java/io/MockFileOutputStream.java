@@ -225,4 +225,9 @@ public class MockFileOutputStream extends FileOutputStream implements LeakingRes
 
 		super.close();
 	}
+	
+	@Override
+	public boolean isClosed() {
+		return closed;
+	}
 }

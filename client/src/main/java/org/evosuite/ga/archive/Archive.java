@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.evosuite.Properties;
+import org.evosuite.coverage.ltl.LtlCoverageTestFitness;
 import org.evosuite.ga.Chromosome;
 import org.evosuite.ga.SecondaryObjective;
 import org.evosuite.runtime.util.AtMostOnceLogger;
@@ -384,9 +385,9 @@ public abstract class Archive<F extends TestFitnessFunction, T extends TestChrom
         }
         String desc = Type.getMethodDescriptor(genericMethod.getMethod());
         if ((genericMethod.getName() + desc).equals(methodName)) {
-          logger.info("Removing method " + methodName + " from cluster");
+//          logger.warn("Removing method " + methodName + " from cluster");
           cluster.removeTestCall(call);
-          logger.info("Testcalls left: " + cluster.getNumTestCalls());
+//          logger.warn("Testcalls left: " + cluster.getNumTestCalls());
         }
       } else if (call instanceof GenericConstructor) {
         GenericConstructor genericConstructor = (GenericConstructor) call;
@@ -395,9 +396,9 @@ public abstract class Archive<F extends TestFitnessFunction, T extends TestChrom
         }
         String desc = Type.getConstructorDescriptor(genericConstructor.getConstructor());
         if (("<init>" + desc).equals(methodName)) {
-          logger.info("Removing constructor " + methodName + " from cluster");
+//          logger.warn("Removing constructor " + methodName + " from cluster");
           cluster.removeTestCall(call);
-          logger.info("Testcalls left: " + cluster.getNumTestCalls());
+//          logger.warn("Testcalls left: " + cluster.getNumTestCalls());
         }
       }
     }
@@ -476,6 +477,13 @@ public abstract class Archive<F extends TestFitnessFunction, T extends TestChrom
   }
 
   private String getMethodName(F target) {
+//	  
+//	if (target instanceof LtlCoverageTestFitness) {
+//		  String secondaryTarget = ((LtlCoverageTestFitness) target).getSecondaryTargetMethod();
+//		  if (secondaryTarget != null) {
+//			  return secondaryTarget;
+//		  }
+//	}
     return target.getTargetMethod();
   }
 
@@ -502,6 +510,7 @@ public abstract class Archive<F extends TestFitnessFunction, T extends TestChrom
     if (!this.nonCoveredTargetsOfEachMethod.containsKey(methodFullName)) {
       return 0;
     }
+//    logger.warn("managed to map method name to targets: " + methodFullName);
     return this.nonCoveredTargetsOfEachMethod.get(methodFullName).size();
   }
 

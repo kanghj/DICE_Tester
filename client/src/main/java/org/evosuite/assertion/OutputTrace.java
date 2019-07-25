@@ -268,6 +268,16 @@ public class OutputTrace<T extends OutputTraceEntry> implements Cloneable {
 		return copy;
 	}
 	
+	public void printTrace() {
+		for (Integer position : trace.keySet()) {
+			for (Integer var : trace.get(position).keySet()) {
+				logger.warn("position:" + position.toString());
+				logger.warn("var:" + var.toString());
+				logger.warn("value:" + ((PrimitiveTraceEntry) trace.get(position).get(var)).value.toString());
+			}
+		}
+	}
+	
 	@Override
 	public String toString() {
 		return "Output trace of size " + trace.size();

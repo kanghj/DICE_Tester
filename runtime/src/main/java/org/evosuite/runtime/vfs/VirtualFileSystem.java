@@ -143,6 +143,18 @@ public final class VirtualFileSystem {
 			leakingResources.clear();
 		}
 	}
+	
+	public int getNumberOfLeakingResources() {
+		int count = 0;
+		
+		for (LeakingResource res : this.leakingResources) {
+			if (!res.isClosed()) {
+				count += 1;
+			}
+		}
+		
+		return count;
+	}
 
 	/**
 	 * Add a leaking resource to this VFS.

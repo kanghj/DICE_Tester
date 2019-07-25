@@ -95,7 +95,6 @@ public class CoverageArchive<F extends TestFitnessFunction, T extends TestChromo
     T currentSolution = this.covered.get(target);
 
     if (currentSolution == null) {
-      logger.debug("Solution for non-covered target '" + target + "'");
       isNewCoveredTarget = true;
     } else {
       isNewSolutionBetterThanCurrent = this.isBetterThanCurrent(currentSolution, solution);

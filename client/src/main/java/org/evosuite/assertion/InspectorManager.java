@@ -21,6 +21,8 @@ package org.evosuite.assertion;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.Socket;
+import java.security.Signature;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Stack;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.evosuite.Properties;
@@ -275,5 +278,9 @@ public class InspectorManager {
 		if (inspectors.containsKey(clazz)) {
 			inspectors.get(clazz).remove(inspector);
 		}
+	}
+	
+	public static void main(String... args) {
+		new InspectorManager().determineInspectors(Stack.class);
 	}
 }

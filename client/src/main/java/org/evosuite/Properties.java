@@ -20,6 +20,7 @@
 package org.evosuite;
 
 import org.evosuite.classpath.ClassPathHandler;
+import org.evosuite.coverage.ltl.LtlCoverageTestFitness;
 import org.evosuite.lm.MutationType;
 import org.evosuite.regression.RegressionMeasure;
 import org.evosuite.runtime.LoopCounter;
@@ -146,7 +147,7 @@ public class Properties {
 
 	@Parameter(key = "object_reuse_probability", group = "Test Creation", description = "Probability to reuse an existing reference, if available")
 	@DoubleValue(min = 0.0, max = 1.0)
-	public static double OBJECT_REUSE_PROBABILITY = 0.9;
+	public static double OBJECT_REUSE_PROBABILITY = 0.99;
 
 	@Parameter(key = "primitive_reuse_probability", group = "Test Creation", description = "Probability to reuse an existing primitive, if available")
 	@DoubleValue(min = 0.0, max = 1.0)
@@ -154,11 +155,11 @@ public class Properties {
 
 	@Parameter(key = "primitive_pool", group = "Test Creation", description = "Probability to use a primitive from the pool rather than a random value")
 	@DoubleValue(min = 0.0, max = 1.0)
-	public static double PRIMITIVE_POOL = 0.5;
+	public static double PRIMITIVE_POOL = 0.9;
 
 	@Parameter(key = "dynamic_pool", group = "Test Creation", description = "Probability to use a primitive from the dynamic pool rather than a random value")
 	@DoubleValue(min = 0.0, max = 1.0)
-	public static double DYNAMIC_POOL = 0.5;
+	public static double DYNAMIC_POOL = 0.9;
 
 	@Parameter(key = "variable_pool", group = "Test Creation", description = "Set probability of a constant based on the number of occurrences")
 	@DoubleValue(min = 0.0, max = 1.0)
@@ -177,7 +178,7 @@ public class Properties {
 
 	@Parameter(key = "p_object_pool", group = "Test Creation", description = "Probability to use a predefined sequence from the pool rather than a random generator")
 	@DoubleValue(min = 0.0, max = 1.0)
-	public static double P_OBJECT_POOL = 0.3;
+	public static double P_OBJECT_POOL = 0.7;
 
 	@Parameter(key = "object_pools", group = "Test Creation", description = "List of object pools")
 	public static String OBJECT_POOLS = "";
@@ -229,7 +230,7 @@ public class Properties {
 	public static int MAX_LENGTH = 0;
 
 	@Parameter(key = "max_size", group = "Test Creation", description = "Maximum number of test cases in a test suite")
-	public static int MAX_SIZE = 100;
+	public static int MAX_SIZE = 200;
 
 	@Parameter(key = "num_tests", group = "Test Creation", description = "Number of tests in initial test suites")
 	public static int NUM_TESTS = 2;
@@ -250,10 +251,10 @@ public class Properties {
 	public static int INSERTION_SCORE_UUT = 1;
 
 	@Parameter(key = "insertion_uut", group = "Test Creation", description = "Score for selection of insertion of UUT calls")
-	public static double INSERTION_UUT = 0.5;
+	public static double INSERTION_UUT = 0.7;
 
 	@Parameter(key = "insertion_uut", group = "Test Creation", description = "Score for selection of insertion of call to a input parameter")
-	public static double INSERTION_PARAMETER = 0.4;
+	public static double INSERTION_PARAMETER = 0.2;
 
 	@Parameter(key = "insertion_uut", group = "Test Creation", description = "Score for selection of insertion of call on the environment")
 	public static double INSERTION_ENVIRONMENT = 0.1;
@@ -279,7 +280,7 @@ public class Properties {
 
     @Parameter(key = "reflection_start_percent", group = "Test Creation", description = "Percentage [0,1] of search budget after which reflection fields/methods handling is activated")
     @DoubleValue(min = 0.0, max = 1.0)
-    public static double REFLECTION_START_PERCENT = 0.8;
+    public static double REFLECTION_START_PERCENT = 1.0;
 
 	@Parameter(key = "p_functional_mocking", group = "Test Creation", description = "Probability [0,1] of using functional mocking (eg Mockito) when creating object instances")
 	@DoubleValue(min = 0.0, max = 1.0)
@@ -331,7 +332,7 @@ public class Properties {
 	public static RankingType RANKING_TYPE = RankingType.PREFERENCE_SORTING;
 
 	@Parameter(key = "algorithm", group = "Search Algorithm", description = "Search algorithm")
-	public static Algorithm ALGORITHM = Algorithm.MONOTONIC_GA;
+	public static Algorithm ALGORITHM = Algorithm.DYNAMOSA; // Algorithm.MONOTONIC_GA;
 
 	/** Different models of neighbourhoods in the Cellular GA **/
 	public enum CGA_Models{
@@ -348,7 +349,7 @@ public class Properties {
 	public static Long RANDOM_SEED = null;
 
 	@Parameter(key = "check_best_length", group = "Search Algorithm", description = "Check length against length of best individual")
-	public static boolean CHECK_BEST_LENGTH = true;
+	public static boolean CHECK_BEST_LENGTH = false;
 
 	@Parameter(key = "check_parents_length", group = "Search Algorithm", description = "Check length against length of parents")
 	public static boolean CHECK_PARENTS_LENGTH = false; // note, based on STVR experiments
@@ -360,7 +361,7 @@ public class Properties {
 	public static boolean PARENT_CHECK = true;
 
 	@Parameter(key = "check_max_length", group = "Search Algorithm", description = "Check length against fixed maximum")
-	public static boolean CHECK_MAX_LENGTH = true;
+	public static boolean CHECK_MAX_LENGTH = false;
 
 	@Parameter(key = "chop_max_length", group = "Search Algorithm", description = "Chop statements after exception if length has reached maximum")
 	public static boolean CHOP_MAX_LENGTH = true;
@@ -541,10 +542,10 @@ public class Properties {
 
 	@Parameter(key = "chromosome_length", group = "Search Algorithm", description = "Maximum length of chromosomes during search")
 	@IntValue(min = 1, max = 100000)
-	public static int CHROMOSOME_LENGTH = 40;
+	public static int CHROMOSOME_LENGTH = 250;
 
 	@Parameter(key = "number_of_tests_per_target", group = "Search Algorithm", description = "Number of test cases for each target goal to keep in an archive")
-	public static int NUMBER_OF_TESTS_PER_TARGET = 10;
+	public static int NUMBER_OF_TESTS_PER_TARGET = 30;
 
 	@Parameter(key = "p_random_test_or_from_archive", group = "Search Algorithm", description = "Probability [0,1] of sampling a new test at random or choose an existing one in an archive")
 	@DoubleValue(min = 0.0, max = 1.0)
@@ -577,7 +578,7 @@ public class Properties {
 
 	@Parameter(key = "search_budget", group = "Search Algorithm", description = "Maximum search duration")
 	@LongValue(min = 1)
-	public static long SEARCH_BUDGET = 60;
+	public static long SEARCH_BUDGET = 120;
 
 	@Parameter(key = "OUTPUT_DIR", group = "Runtime", description = "Directory in which to put generated files")
 	public static String OUTPUT_DIR = "evosuite-files";
@@ -595,7 +596,7 @@ public class Properties {
 	public static StoppingCondition STOPPING_CONDITION = StoppingCondition.MAXTIME;
 
 	public enum CrossoverFunction {
-		SINGLEPOINTRELATIVE, SINGLEPOINTFIXED, SINGLEPOINT, COVERAGE, UNIFORM
+		SINGLEPOINTRELATIVE, SINGLEPOINTFIXED, SINGLEPOINT, COVERAGE, UNIFORM, MIDDLE
 	}
 
 	@Parameter(key = "crossover_function", group = "Search Algorithm", description = "Crossover function during search")
@@ -631,7 +632,7 @@ public class Properties {
 	}
 
 	@Parameter(key = "selection_function", group = "Search Algorithm", description = "Selection function during search")
-	public static SelectionFunction SELECTION_FUNCTION = SelectionFunction.RANK;
+	public static SelectionFunction SELECTION_FUNCTION = SelectionFunction.RANK_CROWD_DISTANCE_TOURNAMENT; //SelectionFunction.RANK;
 
 	@Parameter(key = "emigrant_selection_function", group = "Search Algorithm", description = "Selection function for emigrant selection during search")
 	public static SelectionFunction EMIGRANT_SELECTION_FUNCTION = SelectionFunction.RANDOMK;
@@ -649,7 +650,10 @@ public class Properties {
 	}
 
 	@Parameter(key = "secondary_objectives", group = "Search Algorithm", description = "Secondary objective during search")
-	public static SecondaryObjective[] SECONDARY_OBJECTIVE = new SecondaryObjective[] { SecondaryObjective.TOTAL_LENGTH };
+	public static SecondaryObjective[] SECONDARY_OBJECTIVE = new SecondaryObjective[] { 
+			//SecondaryObjective.TOTAL_LENGTH 
+			SecondaryObjective.EXCEPTIONS
+	};
 
 	@Parameter(key = "enable_secondary_objective_after", group = "Search Algorithm", description = "Activate the second secondary objective after a certain amount of search budget")
 	public static int ENABLE_SECONDARY_OBJECTIVE_AFTER = 0;
@@ -661,10 +665,10 @@ public class Properties {
 	public static int STARVATION_AFTER_GENERATION = 500;
 
 	@Parameter(key = "bloat_factor", group = "Search Algorithm", description = "Maximum relative increase in length")
-	public static int BLOAT_FACTOR = 2;
+	public static int BLOAT_FACTOR = 3;
 
 	@Parameter(key = "stop_zero", group = "Search Algorithm", description = "Stop optimization once goal is covered")
-	public static boolean STOP_ZERO = true;
+	public static boolean STOP_ZERO = false;
 
 	@Parameter(key = "dynamic_limit", group = "Search Algorithm", description = "Multiply search budget by number of test goals")
 	public static boolean DYNAMIC_LIMIT = false;
@@ -679,13 +683,13 @@ public class Properties {
 
     @Parameter(key = "assertion_timeout", group = "Search Algorithm", description = "Seconds allowed for assertion generation at the end")
     @IntValue(min = 0)
-    public static int ASSERTION_TIMEOUT = 60;
+    public static int ASSERTION_TIMEOUT = 120;
 
     @Parameter(key="assertion_minimization_fallback", group = "Search Algorithm", description = "Percentage of tests expected to have assertions at fallback check time")
-    public static double ASSERTION_MINIMIZATION_FALLBACK = 1/2d;
+    public static double ASSERTION_MINIMIZATION_FALLBACK = 1;
 
 	@Parameter(key="assertion_minimization_fallback_time", group = "Search Algorithm", description = "Percentage of tests applied to minimisation before checking fallback. 1.0 for no fallback.")
-	public static double ASSERTION_MINIMIZATION_FALLBACK_TIME = 2/3d;
+	public static double ASSERTION_MINIMIZATION_FALLBACK_TIME = 0;
 
 	@Parameter(key = "junit_check_timeout", group = "Search Algorithm", description = "Seconds allowed for checking the generated JUnit files (e.g., compilation and stability)")
 	@IntValue(min = 0)
@@ -693,7 +697,7 @@ public class Properties {
 
 	@Parameter(key = "write_junit_timeout", group = "Search Algorithm", description = "Seconds allowed to write on disk the generated JUnit files")
 	@IntValue(min = 0)
-	public static int WRITE_JUNIT_TIMEOUT = 60; //Note: we need it, as we currently first run the tests before we write them
+	public static int WRITE_JUNIT_TIMEOUT = 180; //Note: we need it, as we currently first run the tests before we write them
 
 	@Parameter(key = "carving_timeout", group = "Search Algorithm", description = "Seconds allowed for carving JUnit tests")
 	@IntValue(min = 0)
@@ -921,7 +925,7 @@ public class Properties {
 	public static String TOOLS_JAR_LOCATION = null;
 
 	@Parameter(key = "pure_inspectors", group = "Output", description = "Selects only an underapproximation of all inspectors that are also pure (no side-effects)")
-	public static boolean PURE_INSPECTORS = true;
+	public static boolean PURE_INSPECTORS = false;
 
 	@Parameter(key = "pure_equals", group = "Output", description = "Selects only an underapproximation of equals(Object) that are also known to be pure (no side-effects)")
 	public static boolean PURE_EQUALS = false;
@@ -945,7 +949,7 @@ public class Properties {
 	public static String LOG_TARGET = null;
 
 	@Parameter(key = "minimize", group = "Output", description = "Minimize test suite after generation")
-	public static boolean MINIMIZE = true;
+	public static boolean MINIMIZE = false;
 
 	@Parameter(key = "minimize_second_pass", group = "Output", description = "Perform a second minimization pass as the first one may retain subsumed tests")
 	public static boolean MINIMIZE_SECOND_PASS = true;
@@ -980,7 +984,7 @@ public class Properties {
 	public static MutationType LM_MUTATION_TYPE = MutationType.EVOSUITE;
 
 	@Parameter(key = "coverage", group = "Output", description = "Calculate coverage after test suite generation")
-	public static boolean COVERAGE = true;
+	public static boolean COVERAGE = false;
 
 	@Parameter(key = "inline", group = "Output", description = "Inline all constants")
 	public static boolean INLINE = true;
@@ -1121,20 +1125,20 @@ public class Properties {
 	// ---------------------------------------------------------------
 	// Sandbox
 	@Parameter(key = "sandbox", group = "Sandbox", description = "Execute tests in a sandbox environment")
-	public static boolean SANDBOX = true;
+	public static boolean SANDBOX = false;
 
 	@Parameter(key = "sandbox_mode", group = "Sandbox", description = "Mode in which the sandbox is applied")
-	public static Sandbox.SandboxMode SANDBOX_MODE = Sandbox.SandboxMode.RECOMMENDED;
+	public static Sandbox.SandboxMode SANDBOX_MODE = Sandbox.SandboxMode.OFF;
 
 	@Parameter(key = "filter_sandbox_tests", group = "Sandbox", description = "Drop tests that require the sandbox")
 	public static boolean FILTER_SANDBOX_TESTS = false;
 
     @Parameter(key = "virtual_fs", group = "Sandbox", description = "Usa a virtual file system for all File I/O operations")
-    public static boolean VIRTUAL_FS = true;
+    public static boolean VIRTUAL_FS = false;
 
 
     @Parameter(key = "virtual_net", group = "Sandbox", description = "Usa a virtual network for all TCP/UDP communications")
-    public static boolean VIRTUAL_NET = true;
+    public static boolean VIRTUAL_NET = false;
 
     @Parameter(key = "use_separate_classloader", group = "Sandbox", description = "Usa a separate classloader in the final test cases")
     public static boolean USE_SEPARATE_CLASSLOADER = true;
@@ -1154,10 +1158,10 @@ public class Properties {
 	public static int CLUSTER_RECURSION = 10;
 
 	@Parameter(key = "sort_calls", description = "Sort SUT methods by remaining coverage to bias search towards uncovered parts")
-	public static boolean SORT_CALLS = false;
+	public static boolean SORT_CALLS = LtlCoverageTestFitness.allowEvolutionWithoutLTLFitness ? false : true;
 
 	@Parameter(key = "sort_objects", description = "Sort objects in a test to make calls on objects closer to SUT more likely")
-	public static boolean SORT_OBJECTS = false;
+	public static boolean SORT_OBJECTS = true;
 
 	@Parameter(key = "inheritance_file", description = "Cached version of inheritance tree")
 	public static String INHERITANCE_FILE = "";
@@ -1220,7 +1224,7 @@ public class Properties {
 	public static boolean TEST_ARCHIVE = true;
 
 	@Parameter(key = "test_factory", description = "Which factory creates tests")
-	public static TestFactory TEST_FACTORY = TestFactory.ARCHIVE;
+	public static TestFactory TEST_FACTORY = TestFactory.RANDOM;
 
 	public enum ArchiveType {
 		COVERAGE, MIO
@@ -1412,13 +1416,18 @@ public class Properties {
 		EXCEPTION, DEFUSE, ALLDEFS, BRANCH, CBRANCH, STRONGMUTATION, WEAKMUTATION,
 		MUTATION, STATEMENT, RHO, AMBIGUITY, IBRANCH, READABILITY,
         ONLYBRANCH, ONLYMUTATION, METHODTRACE, METHOD, METHODNOEXCEPTION, LINE, ONLYLINE, OUTPUT, INPUT,
-        REGRESSION,	REGRESSIONTESTS, TRYCATCH
+        REGRESSION,	REGRESSIONTESTS, TRYCATCH, METHODPAIR,
+         LTLCOVERAGE, NOLEAK
 	}
 
     @Parameter(key = "criterion", group = "Runtime", description = "Coverage criterion. Can define more than one criterion by using a ':' separated list")
     public static Criterion[] CRITERION = new Criterion[] {
             //these are basic criteria that should be always on by default
-            Criterion.LINE, Criterion.BRANCH, Criterion.EXCEPTION, Criterion.WEAKMUTATION, Criterion.OUTPUT, Criterion.METHOD, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH  };
+            Criterion.LINE, Criterion.BRANCH, Criterion.EXCEPTION, Criterion.WEAKMUTATION, Criterion.OUTPUT, Criterion.METHOD, Criterion.METHODNOEXCEPTION, Criterion.CBRANCH,  
+//            Criterion.FSATRANSITION, 
+            Criterion.LTLCOVERAGE 
+//            Criterion.NOLEAK
+            };
 
 
     /** Cache target class */
@@ -1475,6 +1484,10 @@ public class Properties {
 	public static boolean EXCLUDE_IBRANCHES_CUT = false;
 
 
+	/** Stray properties for ltl exploration and feedback and things like that **/
+	@Parameter(key ="path_to_ltl_rules", group="LTL", description= "Path to the ltl rules we want to find counter-examples to")
+	public static String PATH_TO_LTL_RULES = "";
+	
 	/*** Evosuite regression testing properties ***/
 
 	@Parameter(key = "regressioncp", group = "Runtime", description = "Regression testing classpath")
@@ -1529,7 +1542,7 @@ public class Properties {
 	}
 
 	@Parameter(key = "strategy", group = "Runtime", description = "Which mode to use")
-	public static Strategy STRATEGY = Strategy.EVOSUITE;
+	public static Strategy STRATEGY = Strategy.MOSUITE;
 
 	@Parameter(key = "process_communication_port", group = "Runtime", description = "Port at which the communication with the external process is done")
 	public static int PROCESS_COMMUNICATION_PORT = -1;

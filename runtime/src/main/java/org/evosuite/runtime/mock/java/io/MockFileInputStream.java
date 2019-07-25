@@ -238,4 +238,9 @@ public class MockFileInputStream extends FileInputStream implements LeakingResou
 	public void release() throws Exception {		
 		super.close();
 	}
+	
+	@Override
+	public boolean isClosed() {
+		return closed;
+	}
 }

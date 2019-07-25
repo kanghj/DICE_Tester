@@ -358,6 +358,8 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	 *            a int.
 	 */
 	protected void generateInitialPopulation(int population_size) {
+//		logger.warn("current pop:" + population.size());
+//		logger.warn("requested pop:" + population_size);
 		generateRandomPopulation(population_size - population.size());
 	}
 
@@ -413,7 +415,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	 *            a int.
 	 */
 	protected void generateRandomPopulation(int population_size) {
-		logger.debug("Creating random population");
+//		logger.warn("Creating random population");
 		for (int i = 0; i < population_size; i++) {
 			T individual = chromosomeFactory.getChromosome();
 			for (FitnessFunction<?> fitnessFunction : this.fitnessFunctions) {
@@ -424,7 +426,7 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 			if (isFinished())
 				break;
 		}
-		logger.debug("Created " + population.size() + " individuals");
+//		logger.warn("Created " + population.size() + " individuals");
 	}
 
 	/**
@@ -893,9 +895,11 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	 * Notify all search listeners of iteration
 	 */
 	protected void notifyIteration() {
+//		logger.warn("nofityIteration START");
 		for (SearchListener listener : listeners) {
 			listener.iteration(this);
 		}
+//		logger.warn("nofityIteration END");
 	}
 
 	/**
@@ -977,9 +981,11 @@ public abstract class GeneticAlgorithm<T extends Chromosome> implements SearchAl
 	 */
 	public boolean isFinished() {
 		for (StoppingCondition c : stoppingConditions) {
-			// logger.error(c + " "+ c.getCurrentValue());
-			if (c.isFinished())
+//			 logger.warn("STOPPING CONDITION:" + c + " "+ c.getCurrentValue());
+			if (c.isFinished()) {
+//				logger.warn("FINISHED" + c);
 				return true;
+			}
 		}
 		return false;
 	}

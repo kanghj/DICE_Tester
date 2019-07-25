@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.evosuite</groupId>
 		<artifactId>evosuite</artifactId>
-		<version>1.0.7-SNAPSHOT</version>
+		<version>1.0.7-DICE</version>
 	</parent>
 
 	<artifactId>evosuite-client</artifactId>
@@ -39,6 +39,9 @@
         <dependency>
             <groupId>com.sun</groupId>
             <artifactId>tools</artifactId>
+  			<scope>system</scope>
+			<systemPath>/opt/java/openjdk/lib/tools.jar</systemPath>
+
         </dependency>
         <dependency>
             <groupId>org.ow2.asm</groupId>

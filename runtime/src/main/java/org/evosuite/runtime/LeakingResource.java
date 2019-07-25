@@ -35,4 +35,6 @@ public interface LeakingResource {
 	 */
 	public void release() throws Exception;
 	
+	public boolean isClosed();
+	
 }

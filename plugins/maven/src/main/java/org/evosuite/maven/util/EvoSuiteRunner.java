@@ -253,6 +253,7 @@ public class EvoSuiteRunner {
 			}
 
 			logger.debug("Working directory: "+baseDir);
+			logger.warn("going to run" + cmd);
 			if(logger.isDebugEnabled()) {
 				logger.debug("Going to execute command: " + String.join(" ", cmd));
 			}

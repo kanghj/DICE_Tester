@@ -316,8 +316,8 @@ public class JobExecutor {
 				//do not use timeout if we are debugging
 				latch.await();
 			} else {
-				//add one extra minute just to be sure
-				boolean elapsed = !latch.await(configuration.timeInMinutes + 1, TimeUnit.MINUTES);
+				//add five extra minute just to be sure
+				boolean elapsed = !latch.await(configuration.timeInMinutes + 5, TimeUnit.MINUTES);
 				if (elapsed) {
 					logger.error("The jobs did not finish in time");
 				}

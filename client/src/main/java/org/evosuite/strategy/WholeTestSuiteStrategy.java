@@ -23,6 +23,8 @@ import org.evosuite.Properties;
 import org.evosuite.Properties.Criterion;
 import org.evosuite.TestGenerationContext;
 import org.evosuite.coverage.TestFitnessFactory;
+import org.evosuite.coverage.specmining.FindConstants;
+import org.evosuite.coverage.specmining.SpecMiningTraceReporter;
 import org.evosuite.ga.FitnessFunction;
 import org.evosuite.ga.metaheuristics.GeneticAlgorithm;
 import org.evosuite.ga.stoppingconditions.MaxStatementsStoppingCondition;
@@ -56,6 +58,7 @@ public class WholeTestSuiteStrategy extends TestGenerationStrategy {
 	public TestSuiteChromosome generateTests() {
 		// Set up search algorithm
 		LoggingUtils.getEvoLogger().info("* Setting up search algorithm for whole suite generation");
+		
 		PropertiesSuiteGAFactory algorithmFactory = new PropertiesSuiteGAFactory();
 		GeneticAlgorithm<TestSuiteChromosome> algorithm = algorithmFactory.getSearchAlgorithm();
 		
@@ -74,6 +77,7 @@ public class WholeTestSuiteStrategy extends TestGenerationStrategy {
 
 		// if (Properties.SHOW_PROGRESS && !logger.isInfoEnabled())
 		algorithm.addListener(progressMonitor); // FIXME progressMonitor may cause
+		algorithm.addListener(new SpecMiningTraceReporter());
 		// client hang if EvoSuite is
 		// executed with -prefix!
 
@@ -89,7 +93,9 @@ public class WholeTestSuiteStrategy extends TestGenerationStrategy {
 
 		// TODO: why it was only if "analyzing"???
 		// if (analyzing)
+		
 		algorithm.resetStoppingConditions();
+		
 
 		List<TestFitnessFunction> goals = getGoals(true);
 		if(!canGenerateTestsForSUT()) {
@@ -144,6 +150,8 @@ public class WholeTestSuiteStrategy extends TestGenerationStrategy {
 
 		// Search is finished, send statistics
 		sendExecutionStatistics();
+//		LoggingUtils.getEvoLogger().warn("* Search finished. String literals are  " + FindConstants.niceStrings);
+		
 
 		return testSuite;
 	}

@@ -83,6 +83,8 @@ public abstract class StructuralGoalManager<T extends Chromosome> implements Ser
 		// the next two lines are needed since that coverage information are used
 		// during EvoSuite post-processing
 		TestChromosome tch = (TestChromosome) tc;
+//		tch.getTestCase().getCoveredGoals().add((TestSuiteFitnessFunction) f);
+		
 		tch.getTestCase().getCoveredGoals().add((TestFitnessFunction) f);
 
 		// update covered targets

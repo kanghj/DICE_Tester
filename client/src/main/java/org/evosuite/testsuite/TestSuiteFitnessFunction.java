@@ -22,6 +22,12 @@ package org.evosuite.testsuite;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.evosuite.assertion.ArgumentValueTraceEntry;
+import org.evosuite.assertion.ArgumentValueTraceObserver;
+import org.evosuite.assertion.NullTraceEntry;
+import org.evosuite.assertion.NullTraceObserver;
+import org.evosuite.assertion.PrimitiveTraceEntry;
+import org.evosuite.assertion.PrimitiveTraceObserver;
 import org.evosuite.ga.FitnessFunction;
 import org.evosuite.ga.stoppingconditions.MaxStatementsStoppingCondition;
 import org.evosuite.testcase.ExecutableChromosome;
@@ -58,6 +64,15 @@ public abstract class TestSuiteFitnessFunction extends
 	@Deprecated
 	public ExecutionResult runTest(TestCase test) {
 		ExecutionResult result = new ExecutionResult(test, null);
+		
+		PrimitiveTraceObserver primitiveObserver = new PrimitiveTraceObserver();
+		NullTraceObserver nullObserver = new NullTraceObserver();
+		ArgumentValueTraceObserver argsValueObserver = new ArgumentValueTraceObserver();
+		
+		TestCaseExecutor.getInstance().addObserver(primitiveObserver);
+		TestCaseExecutor.getInstance().addObserver(nullObserver);
+		TestCaseExecutor.getInstance().addObserver(argsValueObserver);
+//		logger.warn("Number of observers : " + TestCaseExecutor.getInstance().getExecutionObservers().size());
 
 		try {
 			result = TestCaseExecutor.getInstance().execute(test);
@@ -72,6 +87,14 @@ public abstract class TestSuiteFitnessFunction extends
 			}
 
 		}
+		
+		result.setTrace(primitiveObserver.getTrace(), PrimitiveTraceEntry.class);
+		result.setTrace(nullObserver.getTrace(), NullTraceEntry.class);
+		result.setTrace(argsValueObserver.getTrace(), ArgumentValueTraceEntry.class);
+		
+		TestCaseExecutor.getInstance().removeObserver(primitiveObserver);
+		TestCaseExecutor.getInstance().removeObserver(nullObserver);
+		TestCaseExecutor.getInstance().removeObserver(argsValueObserver);
 
 		// System.out.println("TG: Killed "+result.getNumKilled()+" out of "+mutants.size());
 		return result;

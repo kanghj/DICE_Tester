@@ -53,13 +53,13 @@ public class StrongMutationTestFitness extends MutationTestFitness {
 	/** Constant <code>observerClasses</code> */
 	protected static Class<?>[] observerClasses = { PrimitiveTraceEntry.class,
 	        ComparisonTraceEntry.class, InspectorTraceEntry.class,
-	        PrimitiveFieldTraceEntry.class, NullTraceEntry.class, ArrayTraceEntry.class, ArrayLengthTraceEntry.class };
+	        PrimitiveFieldTraceEntry.class, NullTraceEntry.class, ArrayTraceEntry.class, ArrayLengthTraceEntry.class, ArgumentValueTraceEntry.class };
 
 	/** Constant <code>observers</code> */
 	protected static AssertionTraceObserver<?>[] observers = {
 	        new PrimitiveTraceObserver(), new ComparisonTraceObserver(),
 	        new InspectorTraceObserver(), new PrimitiveFieldTraceObserver(),
-	        new NullTraceObserver(), new ArrayTraceObserver(), new ArrayLengthObserver() };
+	        new NullTraceObserver(), new ArrayTraceObserver(), new ArrayLengthObserver(), new ArgumentValueTraceObserver() };
 
 	/**
 	 * <p>

@@ -125,6 +125,7 @@ public class EvoSuite {
         }
 
 
+
         // create the parser
         CommandLineParser parser = new GnuParser();
         try {
@@ -151,6 +152,7 @@ public class EvoSuite {
                 }
             }
 
+            
             setupProperties();
 
             if (SystemUtils.IS_JAVA_9 || SystemUtils.IS_JAVA_10) {
@@ -160,6 +162,7 @@ public class EvoSuite {
             if (TestSuiteWriterUtils.needToUseAgent() && Properties.JUNIT_CHECK) {
                 ClassPathHacker.initializeToolJar();
             }
+            
 
             if (!line.hasOption("regressionSuite")) {
                 if (line.hasOption("criterion")) {
@@ -176,7 +179,16 @@ public class EvoSuite {
             } else {
                 javaOpts.add("-Dcriterion=regression");
             }
+            
+            // ltl counterexamples stuff
+            if (line.hasOption("path_to_ltl_rules")) {
+                LoggingUtils.getEvoLogger().info("* Path to LTL rules on Evosuite.java" + Properties.PATH_TO_LTL_RULES);
 
+            	javaOpts.add("-Dpath_to_ltl_rules=" + line.getOptionValue("path_to_ltl_rules"));
+            }
+
+            //....
+            
             if (line.hasOption("parallel")) {
                 String[] values = line.getOptionValues("parallel");
 
@@ -210,10 +222,13 @@ public class EvoSuite {
 			 * FIXME: every time in the Master we set a parameter with -D,
 			 * we should check if it actually exists (ie detect typos)
 			 */
+            
 
             CommandLineParameters.handleSeed(javaOpts, line);
 
             CommandLineParameters.addJavaDOptions(javaOpts, line);
+            
+            
 
 //            if (TestSuiteWriterUtils.needToUseAgent() && Properties.JUNIT_CHECK) {
 //                ClassPathHacker.initializeToolJar();
@@ -223,6 +238,8 @@ public class EvoSuite {
 
             CommandLineParameters.handleJVMOptions(javaOpts, line);
 
+
+            
 
             if (line.hasOption("base_dir")) {
                 base_dir_path = line.getOptionValue("base_dir");

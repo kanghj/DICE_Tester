@@ -20,15 +20,22 @@
 package org.evosuite.ga.metaheuristics.mosa.structural;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 
 import org.evosuite.Properties;
 import org.evosuite.TestGenerationContext;
+import org.evosuite.TimeController;
 import org.evosuite.Properties.Criterion;
 import org.evosuite.coverage.branch.BranchCoverageFactory;
 import org.evosuite.coverage.branch.BranchCoverageGoal;
@@ -41,6 +48,7 @@ import org.evosuite.coverage.exception.TryCatchCoverageTestFitness;
 import org.evosuite.coverage.io.input.InputCoverageTestFitness;
 import org.evosuite.coverage.io.output.OutputCoverageTestFitness;
 import org.evosuite.coverage.line.LineCoverageTestFitness;
+import org.evosuite.coverage.ltl.LtlCoverageTestFitness;
 import org.evosuite.coverage.method.MethodCoverageTestFitness;
 import org.evosuite.coverage.method.MethodNoExceptionCoverageTestFitness;
 import org.evosuite.coverage.mutation.StrongMutationTestFitness;
@@ -74,6 +82,15 @@ public class MultiCriteriaManager<T extends Chromosome> extends StructuralGoalMa
 	protected BranchFitnessGraph<T, FitnessFunction<T>> graph;
 
 	protected Map<BranchCoverageTestFitness, Set<FitnessFunction<T>>> dependencies;
+	protected Map<MethodCoverageTestFitness, Set<FitnessFunction<T>>> methodDependencies = new LinkedHashMap<>();
+	
+	
+	public int numberOfTimesTriedForBatch = 0;
+	public static int numberOfTimesCalucaltedFitness = 0;
+	public int batchOfFitnessIndex = 0;
+	protected LinkedHashMap<String, Set<FitnessFunction<T>>> batchesOfFitness = new LinkedHashMap<>();
+	
+	protected Map<FitnessFunction, Set<FitnessFunction<T>>> temporalDependencies;
 
 	protected final Map<Integer, FitnessFunction<T>> branchCoverageTrueMap = new LinkedHashMap<Integer, FitnessFunction<T>>();
 	protected final Map<Integer, FitnessFunction<T>> branchCoverageFalseMap = new LinkedHashMap<Integer, FitnessFunction<T>>();
@@ -122,6 +139,11 @@ public class MultiCriteriaManager<T extends Chromosome> extends StructuralGoalMa
 					break;
 				case CBRANCH:
 					addDependencies4CBranch();
+					break;
+			
+					
+				case LTLCOVERAGE:
+					addDependencies4LTL();
 					break;
 				default:
 					LoggingUtils.getEvoLogger().error("The criterion {} is not currently supported in DynaMOSA", criterion.name());
@@ -268,6 +290,70 @@ public class MultiCriteriaManager<T extends Chromosome> extends StructuralGoalMa
 			}
 		}
 	}
+	
+
+	
+	/**
+	 * This methods derive the dependencies between {@link CBranchTestFitness} and branches.
+	 * Therefore, it is used to update 'this.dependencies'
+	 */
+	@SuppressWarnings("unchecked")
+	private void addDependencies4LTL() {
+		logger.debug("Added dependencies for LTL");
+		
+	
+		
+//		Random rand = new Random();
+		List<FitnessFunction> uncoveredGoals = new ArrayList<>(this.getUncoveredGoals());
+		Collections.shuffle(uncoveredGoals);
+		for (FitnessFunction<T> ff : uncoveredGoals) {
+			if (ff instanceof LtlCoverageTestFitness){
+				
+				LtlCoverageTestFitness ltlFitness = (LtlCoverageTestFitness) ff;
+				String lhs = ltlFitness.getStart();
+				String rhs = ltlFitness.getEnd();
+				
+//				new MethodCoverageTestFitness();
+				
+//				if (!batchesOfFitness.containsKey(lhs)) {
+//					batchesOfFitness.put(lhs, new HashSet<>());
+//				}
+//				batchesOfFitness.get(lhs).add(ff);
+//			
+				
+				MethodCoverageTestFitness method = new MethodCoverageTestFitness(ltlFitness.getTargetClass(), ltlFitness.getTargetMethod());
+
+				if (!LtlCoverageTestFitness.allowEvolutionWithoutLTLFitness) {
+					if (!methodDependencies.containsKey(method)) {
+						methodDependencies.put(method, new HashSet<>());
+					}
+					methodDependencies.get(method).add(ff);
+				} else {
+					this.currentGoals.add(ff);
+				}
+			}
+		}
+		
+		if (LtlCoverageTestFitness.allowEvolutionWithoutLTLFitness) {
+			logger.warn("Using allowEvolutionWithoutLTLFitness");
+		}
+//		for (Entry<MethodCoverageTestFitness, Set<FitnessFunction<T>>> entry : methodDependencies.entrySet() ) {
+//			for (FitnessFunction<T> ff : entry.getValue()) {
+//				logger.warn("::: " + entry.getKey() + " ->"  +ff);
+//			}
+//		}
+
+//		for (Entry<String, Set<FitnessFunction<T>>> entry : batchesOfFitness.entrySet()) {
+//		if (index == 0) { // add the first batch into current goals
+//			this.currentGoals.addAll(entry.getValue());
+//			for (FitnessFunction ff : entry.getValue()) {
+//				LoggingUtils.logWarnAtMostOnce(logger, "LTL goal : " + ff);
+//			}
+//			break; // only first iteration
+//		}
+//		}
+	}
+
 
 	/**
 	 * This methods derive the dependencies between {@link WeakMutationTestFitness} and branches. 
@@ -381,6 +467,76 @@ public class MultiCriteriaManager<T extends Chromosome> extends StructuralGoalMa
 		LinkedList<FitnessFunction<T>> targets = new LinkedList<FitnessFunction<T>>();
 		targets.addAll(this.currentGoals);
 
+		
+		boolean insertByBatch = false;
+		if (insertByBatch) {
+			Iterator<Entry<String, Set<FitnessFunction<T>>>> batchesIter = batchesOfFitness.entrySet().iterator();
+			
+			Iterator<FitnessFunction<T>> iter = null;
+			Entry<String, Set<FitnessFunction<T>>> prevBatch = null;
+			Entry<String, Set<FitnessFunction<T>>> currentBatch = null;
+			for (int i = 0; i < batchOfFitnessIndex + 1; i++) {
+				prevBatch = currentBatch;
+				if (!batchesIter.hasNext()) {
+					break;
+				}
+				currentBatch = batchesIter.next();
+				iter = currentBatch.getValue().iterator();
+			}
+	
+			if (iter != null) {
+				while (iter.hasNext()) {
+					LoggingUtils.logWarnAtMostOnce(logger, "iterating through the ltl fitnesses!");
+					FitnessFunction<T> fitnessFunction = iter.next();
+					double value = fitnessFunction.getFitness(c);
+					if (value <= 0.001) {
+						// no need to update covered goals. The loop later will do it!
+						iter.remove();
+						logger.warn("iterating through the ltl fitnesses: removed! Remaining: " + currentBatch.getValue().size());
+					}
+				}
+				
+	//			logger.warn("after removing. Left with " + currentBatch.getValue().size());
+				
+				numberOfTimesTriedForBatch += 1;
+				if (numberOfTimesCalucaltedFitness % 100 == 0) {
+					logger.warn("Fitnesses left : "  + currentBatch.getValue().size());
+					logger.warn("At fitness calculation #" + numberOfTimesCalucaltedFitness);
+				}
+				numberOfTimesCalucaltedFitness+= 1;
+				
+				if (numberOfTimesTriedForBatch > 100 
+						|| currentBatch.getValue().size() < 25) {
+					// time to advance (either all covered, or not able to cover anymore and we got tired of retrying)
+					// or the batch has shrunk enough
+				
+					logger.warn("Advancing Batch (of LTL) index. method=" + currentBatch.getKey() + ". Left to Cover : " + currentBatch.getValue().size());
+					logger.warn("At fitness calculation #" + numberOfTimesCalucaltedFitness);
+					
+					batchOfFitnessIndex += 1;
+					if (batchesIter.hasNext()) { 
+						prevBatch = currentBatch;
+						currentBatch = batchesIter.next();
+					}
+					if (batchOfFitnessIndex < batchesOfFitness.size()) {
+						logger.warn("next batch size is " + currentBatch.getValue().size());
+						for (FitnessFunction<T> fitnessFunction : currentBatch.getValue()) {
+							currentGoals.add(fitnessFunction);			
+						}
+						if (prevBatch != null) {
+							for (FitnessFunction<T> fitnessFunction : prevBatch.getValue()) {
+								currentGoals.remove(fitnessFunction);			
+							}
+						}
+					}
+					
+					numberOfTimesTriedForBatch = 0;
+				} 
+			}
+		}
+		
+		boolean hasChanged = false;
+		
 		while (targets.size()>0){
 			FitnessFunction<T> fitnessFunction = targets.poll();
 
@@ -392,6 +548,7 @@ public class MultiCriteriaManager<T extends Chromosome> extends StructuralGoalMa
 			double value = fitnessFunction.getFitness(c);
 			if (value == 0.0) {
 				updateCoveredGoals(fitnessFunction, c);
+				
 				if (fitnessFunction instanceof BranchCoverageTestFitness){
 					for (FitnessFunction<T> child : graph.getStructuralChildren(fitnessFunction)){
 						targets.addLast(child);
@@ -400,10 +557,53 @@ public class MultiCriteriaManager<T extends Chromosome> extends StructuralGoalMa
 						targets.addLast(dependentTarget);
 					}
 				}
+				
+				if (fitnessFunction instanceof MethodCoverageTestFitness) {
+					MethodCoverageTestFitness methodFitness = (MethodCoverageTestFitness) fitnessFunction;
+
+					if (methodDependencies.containsKey(fitnessFunction)) {
+//						logger.warn("\t\t\t adding " + methodDependencies.get(fitnessFunction).size());
+						for (FitnessFunction<T> dependentTarget : methodDependencies.get(fitnessFunction)){
+							targets.addLast(dependentTarget);
+							
+							if (dependentTarget instanceof LtlCoverageTestFitness && ((LtlCoverageTestFitness) dependentTarget).age == -1) {
+								if (!LtlCoverageTestFitness.allowEvolutionWithoutLTLFitness) {
+									((LtlCoverageTestFitness) dependentTarget).age = 0; // initialize the age to set it as ready for aging
+								}
+							}
+						}
+					} else {
+//						logger.warn("CLEARED method no deps");
+					}
+				}
 			} else {
-				currentGoals.add(fitnessFunction);
+				if (fitnessFunction instanceof LtlCoverageTestFitness) {
+					Random r = new Random();
+					if (((LtlCoverageTestFitness)fitnessFunction).age > 100 ) {
+						// we have seen this target long enough, but still no counter-examples yet. Maybe it's a true correct temporal rule afterall.
+						// free up effort for evolving tests such that tests related to this uncoverable target can be removed.
+						// a good guess for age is 77 as "sensitivity level of δ = 0.05 and a significance level of
+						// α = 0.01, Jeffrey’s interval gives us N = 77."
+						// but... 100 worked better...
+						currentGoals.remove(fitnessFunction);
+						LtlCoverageTestFitness.numRetired += 1;
+						logger.warn("Expiring/Removing goal due to old age> " + (100) + " Goal: "+ fitnessFunction.toString() );
+						
+						hasChanged = true;
+					} else {
+						currentGoals.add(fitnessFunction);
+					}
+				} else {
+					currentGoals.add(fitnessFunction);
+				}
 			}	
 		}
+		
+		if (hasChanged) {
+			logger.warn("\t\t# Current Goals = " + currentGoals.size() + ". time left:" + TimeController.getInstance().getLeftTimeBeforeEnd());
+		}
+
+		
 		currentGoals.removeAll(this.getCoveredGoals());
 		// 2) we update the archive
 		for (Integer branchid : result.getTrace().getCoveredFalseBranches()){

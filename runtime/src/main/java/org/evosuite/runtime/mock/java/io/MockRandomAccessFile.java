@@ -303,4 +303,9 @@ public class MockRandomAccessFile extends RandomAccessFile implements LeakingRes
 	public void release() throws Exception {		
 			super.close();
 	}
+	
+	@Override
+	public boolean isClosed() {
+		return closed;
+	}
 }

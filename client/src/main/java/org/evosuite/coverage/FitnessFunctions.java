@@ -57,6 +57,9 @@ import org.evosuite.coverage.line.LineCoverageFactory;
 import org.evosuite.coverage.line.LineCoverageSuiteFitness;
 import org.evosuite.coverage.line.LineCoverageTestFitness;
 import org.evosuite.coverage.line.OnlyLineCoverageSuiteFitness;
+import org.evosuite.coverage.ltl.LtlCoverageFactory;
+import org.evosuite.coverage.ltl.LtlCoverageTestFitness;
+import org.evosuite.coverage.ltl.LtlCoverageTestSuiteFitness;
 import org.evosuite.coverage.method.MethodCoverageFactory;
 import org.evosuite.coverage.method.MethodCoverageSuiteFitness;
 import org.evosuite.coverage.method.MethodCoverageTestFitness;
@@ -66,6 +69,8 @@ import org.evosuite.coverage.method.MethodNoExceptionCoverageTestFitness;
 import org.evosuite.coverage.method.MethodTraceCoverageFactory;
 import org.evosuite.coverage.method.MethodTraceCoverageSuiteFitness;
 import org.evosuite.coverage.method.MethodTraceCoverageTestFitness;
+import org.evosuite.coverage.methodpair.MethodPairFactory;
+import org.evosuite.coverage.methodpair.MethodPairSuiteFitness;
 import org.evosuite.coverage.mutation.MutationFactory;
 import org.evosuite.coverage.mutation.MutationTestFitness;
 import org.evosuite.coverage.mutation.OnlyMutationFactory;
@@ -75,6 +80,8 @@ import org.evosuite.coverage.mutation.StrongMutationSuiteFitness;
 import org.evosuite.coverage.mutation.StrongMutationTestFitness;
 import org.evosuite.coverage.mutation.WeakMutationSuiteFitness;
 import org.evosuite.coverage.mutation.WeakMutationTestFitness;
+import org.evosuite.coverage.noleak.NoLeakFactory;
+import org.evosuite.coverage.noleak.NoLeakTestFitness;
 import org.evosuite.coverage.readability.ReadabilitySuiteFitness;
 import org.evosuite.coverage.rho.RhoCoverageFactory;
 import org.evosuite.coverage.rho.RhoCoverageSuiteFitness;
@@ -157,6 +164,14 @@ public class FitnessFunctions {
 			return new InputCoverageSuiteFitness();
 		case TRYCATCH:
 			return new TryCatchCoverageSuiteFitness();
+		case METHODPAIR:
+			return new MethodPairSuiteFitness();
+		
+		case LTLCOVERAGE:
+			return new LtlCoverageTestSuiteFitness();
+			
+		case NOLEAK:
+			
 		default:
 			logger.warn("No TestSuiteFitnessFunction defined for {}; using default one (BranchCoverageSuiteFitness)", Arrays.toString(Properties.CRITERION));
 			return new BranchCoverageSuiteFitness();
@@ -218,6 +233,13 @@ public class FitnessFunctions {
 			return new InputCoverageFactory();
 		case TRYCATCH:
 			return new TryCatchCoverageFactory();
+		case METHODPAIR:
+			return new MethodPairFactory();
+		case LTLCOVERAGE:
+			return new LtlCoverageFactory();
+		case NOLEAK:
+			return new NoLeakFactory();
+			
 		default:
 			logger.warn("No TestFitnessFactory defined for " + crit
 			        + " using default one (BranchCoverageFactory)");
@@ -282,6 +304,12 @@ public class FitnessFunctions {
 				return InputCoverageTestFitness.class;
 		case TRYCATCH:
 				return TryCatchCoverageTestFitness.class;
+		case LTLCOVERAGE:
+			return LtlCoverageTestFitness.class;
+		case NOLEAK:
+			return NoLeakTestFitness.class;
+		
+			
 		default:
 				throw new RuntimeException("No criterion defined for " + criterion.name());
 		}

@@ -151,10 +151,11 @@ public class AssignmentStatement extends AbstractStatement {
 					        + tc.getStatement(parameter.getStPosition()).getCode()
 					        + ", assignment statement: "
 					        + tc.getStatement(retval.getStPosition()).getCode()
-					        + "; SUT=" + Properties.TARGET_CLASS);
+					        + "; SUT=" + Properties.TARGET_CLASS, e);
 
 					// FIXXME: IllegalArgumentException may happen when we only have generators
 					// for an abstract supertype and not the concrete type that we need!
+					e.printStackTrace();
 					throw e;
 				} catch (CodeUnderTestException e) {
 					throw e;
@@ -444,3 +445,4 @@ public class AssignmentStatement extends AbstractStatement {
         throw new RuntimeException("Could not find position of assignment statement");
     }
 }
+

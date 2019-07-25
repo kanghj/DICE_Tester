@@ -31,13 +31,16 @@ import org.evosuite.coverage.ibranch.IBranchTestFitness;
 import org.evosuite.coverage.io.input.InputCoverageTestFitness;
 import org.evosuite.coverage.io.output.OutputCoverageTestFitness;
 import org.evosuite.coverage.line.LineCoverageTestFitness;
+import org.evosuite.coverage.ltl.LtlCoverageTestFitness;
 import org.evosuite.coverage.method.MethodCoverageTestFitness;
 import org.evosuite.coverage.method.MethodNoExceptionCoverageTestFitness;
 import org.evosuite.coverage.method.MethodTraceCoverageTestFitness;
+import org.evosuite.coverage.methodpair.MethodPairTestFitness;
 import org.evosuite.coverage.mutation.MutationTestFitness;
 import org.evosuite.coverage.mutation.OnlyMutationTestFitness;
 import org.evosuite.coverage.mutation.StrongMutationTestFitness;
 import org.evosuite.coverage.mutation.WeakMutationTestFitness;
+import org.evosuite.coverage.noleak.NoLeakTestFitness;
 import org.evosuite.coverage.rho.RhoCoverageTestFitness;
 import org.evosuite.coverage.statement.StatementCoverageTestFitness;
 import org.evosuite.runtime.util.AtMostOnceLogger;
@@ -175,6 +178,21 @@ public final class ArchiveUtils {
             return true;
           }
           break;
+        case METHODPAIR:
+            if (goal instanceof MethodPairTestFitness) {
+              return true;
+            }
+            break;
+        case LTLCOVERAGE:
+        	if (goal instanceof LtlCoverageTestFitness) {
+        		return true;
+        	}
+        	break;
+        case NOLEAK:
+        	if (goal instanceof NoLeakTestFitness) {
+        		return true;
+        	}
+        	break;
         default:
           AtMostOnceLogger.warn(logger, "Unknown criterion '" + criterion.name() + "'");
           break;

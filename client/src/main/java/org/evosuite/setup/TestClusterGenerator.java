@@ -539,6 +539,11 @@ public class TestClusterGenerator {
 					// so for now we keep all pure methods.
 					// In the long run, covered methods maybe should be
 					// removed?
+					// allow evosuite to randomly add pure calls too (?)
+					if (!Properties.PURE_INSPECTORS) {
+						cluster.addModifier(new GenericClass(clazz), genericMethod);
+					}
+					else 
 					if (!CheapPurityAnalyzer.getInstance().isPure(method)) {
 						cluster.addModifier(new GenericClass(clazz), genericMethod);
 					}

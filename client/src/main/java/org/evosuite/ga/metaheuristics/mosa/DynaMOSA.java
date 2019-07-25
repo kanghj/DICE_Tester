@@ -20,10 +20,14 @@
 package org.evosuite.ga.metaheuristics.mosa;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.evosuite.Properties;
+import org.evosuite.Properties.Criterion;
+import org.evosuite.assertion.CheapPurityAnalyzer;
+import org.evosuite.coverage.ltl.LtlCoverageTestFitness;
 import org.evosuite.ga.Chromosome;
 import org.evosuite.ga.ChromosomeFactory;
 import org.evosuite.ga.FitnessFunction;
@@ -31,6 +35,8 @@ import org.evosuite.ga.comparators.OnlyCrowdingComparator;
 import org.evosuite.ga.metaheuristics.mosa.structural.MultiCriteriaManager;
 import org.evosuite.ga.metaheuristics.mosa.structural.StructuralGoalManager;
 import org.evosuite.ga.operators.ranking.CrowdingDistance;
+import org.evosuite.ga.stoppingconditions.MaxGenerationStoppingCondition;
+import org.evosuite.ga.stoppingconditions.NoNewGoodCasesStoppingCondition;
 import org.evosuite.utils.LoggingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +80,11 @@ public class DynaMOSA<T extends Chromosome> extends AbstractMOSA<T> {
 
 		// Ranking the union
 		logger.debug("Union Size = {}", union.size());
+		
+		List<String> pureMethods = CheapPurityAnalyzer.getInstance().getPureMethods(Properties.TARGET_CLASS);
+		LtlCoverageTestFitness.addPureMethods(pureMethods);
 
+//		logger.warn("DYNAMOSA evolve -1");
 		// Ranking the union using the best rank algorithm (modified version of the non dominated sorting algorithm
 		this.rankingFunction.computeRankingAssignment(union, this.goalsManager.getCurrentGoals());
 
@@ -84,10 +94,13 @@ public class DynaMOSA<T extends Chromosome> extends AbstractMOSA<T> {
 		int index = 0;
 		List<T> front = null;
 		this.population.clear();
+		
+//		logger.warn("DYNAMOSA evolve 0");
 
 		// Obtain the next front
 		front = this.rankingFunction.getSubfront(index);
 
+//		logger.warn("DYNAMOSA evolve 1. population=" + population.size());
 		while ((remain > 0) && (remain >= front.size()) && !front.isEmpty()) {
 			// Assign crowding distance to individuals
 			this.distance.fastEpsilonDominanceAssignment(front, this.goalsManager.getCurrentGoals());
@@ -105,6 +118,10 @@ public class DynaMOSA<T extends Chromosome> extends AbstractMOSA<T> {
 			}
 		}
 
+		if (LtlCoverageTestFitness.allowEvolutionWithoutLTLFitness) {
+			logger.warn("DYNAMOSA evolving without LTL fitness.");
+		}
+		
 		// Remain is less than front(index).size, insert only the best one
 		if (remain > 0 && !front.isEmpty()) { // front contains individuals to insert
 			this.distance.fastEpsilonDominanceAssignment(front, this.goalsManager.getCurrentGoals());
@@ -122,6 +139,36 @@ public class DynaMOSA<T extends Chromosome> extends AbstractMOSA<T> {
 		logger.debug("Covered goals = {}", goalsManager.getCoveredGoals().size());
 		logger.debug("Current goals = {}", goalsManager.getCurrentGoals().size());
 		logger.debug("Uncovered goals = {}", goalsManager.getUncoveredGoals().size());
+		
+		boolean populationEmpty = this.population.isEmpty();
+		if (populationEmpty) {
+			logger.warn("empty population!");
+		}
+		
+		if (populationEmpty ||  
+				(Arrays.asList(Properties.CRITERION).contains(Criterion.LTLCOVERAGE) &&
+				NoNewGoodCasesStoppingCondition.numberOfIterationsNoChange > 50 
+				&& !LtlCoverageTestFitness.allowEvolutionWithoutLTLFitness)) {
+			
+			logger.warn("reseting population due to lack of changes or empty population (?)");
+			this.clearPopulation();
+//			this.initializePopulation();
+			this.generateInitialPopulation(Properties.POPULATION);
+
+			// Determine fitness
+			this.calculateFitness();
+//			this.notifyIteration();
+			
+
+			// Calculate dominance ranks and crowding distance
+			this.rankingFunction.computeRankingAssignment(this.population, this.goalsManager.getCurrentGoals());
+
+			for (int i = 0; i < this.rankingFunction.getNumberOfSubfronts(); i++){
+				this.distance.fastEpsilonDominanceAssignment(this.rankingFunction.getSubfront(i), this.goalsManager.getCurrentGoals());
+			}
+			
+			NoNewGoodCasesStoppingCondition.numberOfIterationsNoChange = 0;
+		}
 	}
 
 	/**
@@ -132,6 +179,7 @@ public class DynaMOSA<T extends Chromosome> extends AbstractMOSA<T> {
 		logger.debug("executing generateSolution function");
 
 		this.goalsManager = new MultiCriteriaManager<>(this.fitnessFunctions);
+		addStoppingCondition(new NoNewGoodCasesStoppingCondition());
 
 		LoggingUtils.getEvoLogger().info("* Initial Number of Goals in DynMOSA = " +
 				this.goalsManager.getCurrentGoals().size() +" / "+ this.getUncoveredGoals().size());
