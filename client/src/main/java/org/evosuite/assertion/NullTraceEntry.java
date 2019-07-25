@@ -36,7 +36,7 @@ import org.evosuite.testcase.variable.VariableReference;
  */
 public class NullTraceEntry implements OutputTraceEntry {
 
-	private final boolean isNull;
+	public final boolean isNull;
 
 	private final VariableReference var;
 

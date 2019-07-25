@@ -123,6 +123,10 @@ public class CommandLineParameters {
 		Option heapDump = new Option("heapdump", "Create heap dump on client VM out of memory error");
 		Option base_dir = new Option("base_dir", true, "Working directory in which tests and reports will be placed");
 		
+		
+		Option ltl_path = new Option("path_to_ltl_rules", true, "Path to ltl");
+		Option ltl_path2 = new Option("Dpath_to_ltl_rules", true, "Path to ltl");
+		
 		Option parallel = new Option("parallel", true, "Start parallel run with n clients, communicate every i " 
                 + "iteration x individuals (rate), expects #num_parallel_clients #migrants_iteration_frequency #migrants_communication_rate");
 		parallel.setArgs(3);
@@ -160,6 +164,8 @@ public class CommandLineParameters {
 		options.addOption(heapDump);
 		options.addOption(startedByCtg);
 		options.addOption(parallel);
+		options.addOption(ltl_path);
+		options.addOption(ltl_path2);
 
 		return options;
 	}

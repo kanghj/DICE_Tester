@@ -21,6 +21,12 @@ package org.evosuite.testcase;
 
 import java.util.List;
 
+import org.evosuite.assertion.ArgumentValueTraceEntry;
+import org.evosuite.assertion.ArgumentValueTraceObserver;
+import org.evosuite.assertion.NullTraceEntry;
+import org.evosuite.assertion.NullTraceObserver;
+import org.evosuite.assertion.PrimitiveTraceEntry;
+import org.evosuite.assertion.PrimitiveTraceObserver;
 import org.evosuite.ga.FitnessFunction;
 import org.evosuite.testcase.execution.ExecutionResult;
 import org.evosuite.testcase.execution.TestCaseExecutor;
@@ -88,7 +94,12 @@ public abstract class TestFitnessFunction extends FitnessFunction<TestChromosome
 
 	/** {@inheritDoc} */
 	public ExecutionResult runTest(TestCase test) {
-		return TestCaseExecutor.runTest(test);
+		
+		
+		ExecutionResult result = TestCaseExecutor.runTest(test);
+		
+		
+		return result;
 	}
 
 	/**

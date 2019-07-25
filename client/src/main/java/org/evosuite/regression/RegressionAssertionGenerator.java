@@ -20,6 +20,8 @@
 package org.evosuite.regression;
 
 import org.evosuite.Properties;
+import org.evosuite.assertion.ArgumentValueTraceEntry;
+import org.evosuite.assertion.ArgumentValueTraceObserver;
 import org.evosuite.assertion.AssertionGenerator;
 import org.evosuite.assertion.ComparisonTraceEntry;
 import org.evosuite.assertion.ComparisonTraceObserver;
@@ -46,6 +48,7 @@ public class RegressionAssertionGenerator extends AssertionGenerator {
   private static InspectorTraceObserver inspectorObserver = new InspectorTraceObserver();
   private static PrimitiveFieldTraceObserver fieldObserver = new PrimitiveFieldTraceObserver();
   private static NullTraceObserver nullObserver = new NullTraceObserver();
+  private static ArgumentValueTraceObserver argumentValueObserver = new ArgumentValueTraceObserver();
 
   /**
    * Constant <code>observerClasses</code>
@@ -53,7 +56,7 @@ public class RegressionAssertionGenerator extends AssertionGenerator {
   public static Class<?>[] observerClasses = {PrimitiveTraceEntry.class,
       ComparisonTraceEntry.class, SameTraceEntry.class,
       InspectorTraceEntry.class, PrimitiveFieldTraceEntry.class,
-      NullTraceEntry.class};
+      NullTraceEntry.class, ArgumentValueTraceEntry.class};
 
   @Override
   public void addAssertions(TestCase test) {
@@ -71,6 +74,7 @@ public class RegressionAssertionGenerator extends AssertionGenerator {
     }
     TestCaseExecutor.getInstance().addObserver(fieldObserver);
     TestCaseExecutor.getInstance().addObserver(nullObserver);
+    TestCaseExecutor.getInstance().addObserver(argumentValueObserver);
   }
 
   /**
@@ -107,6 +111,7 @@ public class RegressionAssertionGenerator extends AssertionGenerator {
       }
       result.setTrace(fieldObserver.getTrace(), PrimitiveFieldTraceEntry.class);
       result.setTrace(nullObserver.getTrace(), NullTraceEntry.class);
+      result.setTrace(argumentValuesObserver.getTrace(), ArgumentValueTraceEntry.class);
 
     } catch (Exception e) {
       throw new Error(e);

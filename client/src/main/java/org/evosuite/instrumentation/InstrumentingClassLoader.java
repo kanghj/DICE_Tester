@@ -33,6 +33,7 @@ import java.util.Set;
 import org.evosuite.Properties;
 import org.evosuite.TestGenerationContext;
 import org.evosuite.classpath.ResourceList;
+import org.evosuite.coverage.specmining.FindConstants;
 import org.evosuite.runtime.instrumentation.RuntimeInstrumentation;
 import org.evosuite.runtime.javaee.db.DBManager;
 import org.objectweb.asm.ClassReader;
@@ -110,6 +111,8 @@ public class InstrumentingClassLoader extends ClassLoader {
 		try(InputStream is = new FileInputStream(new File(fileName))) {
 
 			byte[] byteBuffer = getTransformedBytes(className, is);
+			
+//			FindConstants.getStrings(this, className, new ClassReader(is));
 
 			createPackageDefinition(fullyQualifiedTargetClass);
 			Class<?> result = defineClass(fullyQualifiedTargetClass, byteBuffer, 0, byteBuffer.length);

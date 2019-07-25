@@ -38,7 +38,7 @@ public class PrimitiveTraceEntry implements OutputTraceEntry {
 
   protected VariableReference var;
 
-  protected Object value;
+  public Object value;
 
   /**
    * <p>Constructor for PrimitiveTraceEntry.</p>

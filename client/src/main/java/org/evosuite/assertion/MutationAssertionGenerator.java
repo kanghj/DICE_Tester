@@ -37,6 +37,7 @@ import org.evosuite.ga.stoppingconditions.MaxStatementsStoppingCondition;
 import org.evosuite.rmi.ClientServices;
 import org.evosuite.statistics.RuntimeVariable;
 import org.evosuite.testcase.statements.Statement;
+import org.evosuite.testcase.ConcreteValueObserver;
 import org.evosuite.testcase.TestCase;
 import org.evosuite.testcase.variable.VariableReference;
 import org.evosuite.testcase.execution.ExecutionResult;
@@ -72,9 +73,11 @@ public abstract class MutationAssertionGenerator extends AssertionGenerator {
 	protected final static InspectorTraceObserver inspectorObserver = new InspectorTraceObserver();
 	protected final static PrimitiveFieldTraceObserver fieldObserver = new PrimitiveFieldTraceObserver();
 	protected final static NullTraceObserver nullObserver = new NullTraceObserver();
+	protected static final ArgumentValueTraceObserver argumentValuesObserver = new ArgumentValueTraceObserver();
 	protected final static ArrayTraceObserver arrayObserver = new ArrayTraceObserver();
 	protected final static ArrayLengthObserver arrayLengthObserver = new ArrayLengthObserver();
 	protected final static ContainsTraceObserver containsTraceObserver = new ContainsTraceObserver();
+	
 
 	protected final static Map<Mutation, Integer> timedOutMutations = new HashMap<Mutation, Integer>();
 
@@ -99,6 +102,7 @@ public abstract class MutationAssertionGenerator extends AssertionGenerator {
 		TestCaseExecutor.getInstance().addObserver(inspectorObserver);
 		TestCaseExecutor.getInstance().addObserver(fieldObserver);
 		TestCaseExecutor.getInstance().addObserver(nullObserver);
+		TestCaseExecutor.getInstance().addObserver(argumentValuesObserver);
 		TestCaseExecutor.getInstance().addObserver(arrayObserver);
 		TestCaseExecutor.getInstance().addObserver(arrayLengthObserver);
 		TestCaseExecutor.getInstance().addObserver(containsTraceObserver);
@@ -131,6 +135,7 @@ public abstract class MutationAssertionGenerator extends AssertionGenerator {
 		inspectorObserver.clear();
 		fieldObserver.clear();
 		nullObserver.clear();
+		argumentValuesObserver.clear();
 		arrayObserver.clear();
 		arrayLengthObserver.clear();
 		containsTraceObserver.clear();
@@ -153,6 +158,7 @@ public abstract class MutationAssertionGenerator extends AssertionGenerator {
 			result.setTrace(inspectorObserver.getTrace(), InspectorTraceEntry.class);
 			result.setTrace(fieldObserver.getTrace(), PrimitiveFieldTraceEntry.class);
 			result.setTrace(nullObserver.getTrace(), NullTraceEntry.class);
+			result.setTrace(argumentValuesObserver.getTrace(), ArgumentValueTraceEntry.class);
 			result.setTrace(arrayObserver.getTrace(), ArrayTraceEntry.class);
 			result.setTrace(arrayLengthObserver.getTrace(), ArrayLengthTraceEntry.class);
 			result.setTrace(containsTraceObserver.getTrace(), ContainsTraceEntry.class);

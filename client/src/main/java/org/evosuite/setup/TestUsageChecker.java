@@ -23,6 +23,7 @@ import org.apache.commons.lang3.ClassUtils;
 import org.evosuite.Properties;
 import org.evosuite.annotations.EvoSuiteTest;
 import org.evosuite.coverage.MethodNameMatcher;
+import org.evosuite.coverage.specmining.SpecMiningUtils;
 import org.evosuite.graphs.GraphPool;
 import org.evosuite.runtime.annotation.EvoSuiteExclude;
 import org.evosuite.runtime.classhandling.ClassResetter;
@@ -104,6 +105,7 @@ public class TestUsageChecker {
             if(!canUse(paramType))
                 return false;
         }
+  
 
         // If default access rights, then check if this class is in the same package as the target class
 		if (!Modifier.isPrivate(c.getModifiers())) {
@@ -142,6 +144,10 @@ public class TestUsageChecker {
         if (Modifier.isPrivate(c.getModifiers()))
             return false;
 
+        if (!Modifier.isPublic(c.getModifiers()))
+        	return false;
+    
+        
         if (!Properties.USE_DEPRECATED) {
 	        try {
                 if(c.isAnnotationPresent(Deprecated.class)) {
@@ -236,6 +242,11 @@ public class TestUsageChecker {
     }
 
     public static boolean canUse(Field f, Class<?> ownerClass) {
+    	
+    	LoggingUtils.logWarnAtMostOnce(logger, "rejecting all canUse (fields). We don't need fields for this work"); 
+    	boolean rejectFields = true;
+    	if (rejectFields)
+    		return 	false;
 
         // TODO we could enable some methods from Object, like getClass
         if (f.getDeclaringClass().equals(java.lang.Object.class))
@@ -395,6 +406,19 @@ public class TestUsageChecker {
                 }
             }
         }
+        
+        if (m.getName().equals("equals")) {
+        	return false;
+        }
+        
+        
+        if (!SpecMiningUtils.isVocabInitialized()) {
+        	SpecMiningUtils.initVocab();
+		}
+        if (!SpecMiningUtils.isInVocab(m.getName()) && !Modifier.isStatic(m.getModifiers())) {
+        	return false;
+        }
+        
 
         // Randoop special case: just clumps together a bunch of hashCodes, so skip it
         if (m.getName().equals("deepHashCode")
@@ -437,6 +461,10 @@ public class TestUsageChecker {
             return true;
         }
 
+
+        if (!Modifier.isPublic(m.getModifiers()))
+        	return false;
+        
         // If default access rights, then check if this class is in the same package as the target class
         if (!Modifier.isPrivate(m.getModifiers())) {
             //		        && !Modifier.isProtected(m.getModifiers())) {

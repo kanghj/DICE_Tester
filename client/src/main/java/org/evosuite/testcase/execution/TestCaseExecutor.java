@@ -20,6 +20,8 @@
 package org.evosuite.testcase.execution;
 
 import java.io.PrintStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -33,6 +35,15 @@ import java.util.concurrent.TimeoutException;
 
 import org.evosuite.Properties;
 import org.evosuite.TestGenerationContext;
+import org.evosuite.assertion.ArgumentValueTraceEntry;
+import org.evosuite.assertion.ArgumentValueTraceObserver;
+import org.evosuite.assertion.ComparisonTraceEntry;
+import org.evosuite.assertion.NullTraceEntry;
+import org.evosuite.assertion.NullTraceObserver;
+import org.evosuite.assertion.PrimitiveTraceEntry;
+import org.evosuite.assertion.PrimitiveTraceObserver;
+import org.evosuite.coverage.specmining.HJScriptRunnerForFTP;
+import org.evosuite.coverage.specmining.SpecMiningUtils;
 import org.evosuite.ga.stoppingconditions.MaxStatementsStoppingCondition;
 import org.evosuite.ga.stoppingconditions.MaxTestsStoppingCondition;
 import org.evosuite.runtime.LoopCounter;
@@ -42,11 +53,14 @@ import org.evosuite.runtime.sandbox.PermissionStatistics;
 import org.evosuite.runtime.sandbox.Sandbox;
 import org.evosuite.runtime.util.JOptionPaneInputs;
 import org.evosuite.runtime.util.SystemInUtil;
+import org.evosuite.runtime.vfs.VirtualFileSystem;
 import org.evosuite.setup.TestCluster;
 import org.evosuite.testcase.TestCase;
 import org.evosuite.testcase.execution.reset.ClassReInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.management.UnixOperatingSystemMXBean;
 
 /**
  * <p>
@@ -132,19 +146,39 @@ public class TestCaseExecutor implements ThreadFactory {
 	 */
 	public static ExecutionResult runTest(TestCase test) {
 
+		PrimitiveTraceObserver primitiveObserver = new PrimitiveTraceObserver();
+		NullTraceObserver nullObserver = new NullTraceObserver();
+//		ArgumentValueTraceObserver argsValueObserver = new ArgumentValueTraceObserver();
+		TestCaseExecutor.getInstance().addObserver(primitiveObserver);
+		TestCaseExecutor.getInstance().addObserver(nullObserver);
+//		TestCaseExecutor.getInstance().addObserver(argsValueObserver);
+		
+		
 		ExecutionResult result = new ExecutionResult(test, null);
 
 		try {
 			TestCaseExecutor executor = getInstance();
 			logger.debug("Executing test");
+			
+			
 			result = executor.execute(test);
-
+			
+				HJScriptRunnerForFTP.runServerIfCrossExecutionCountThreshold();
 			MaxStatementsStoppingCondition.statementsExecuted(result.getExecutedStatements());
 
 		} catch (Exception e) {
 			logger.error("TG: Exception caught: ", e);
 			throw new Error(e);
 		}
+		
+		result.setTrace(primitiveObserver.getTrace(), PrimitiveTraceEntry.class);
+		result.setTrace(nullObserver.getTrace(), NullTraceEntry.class);
+//		result.setTrace(argsValueObserver.getTrace(), ArgumentValueTraceEntry.class);
+
+		TestCaseExecutor.getInstance().removeObserver(primitiveObserver);
+		TestCaseExecutor.getInstance().removeObserver(nullObserver);
+//		TestCaseExecutor.getInstance().removeObserver(argsValueObserver);
+
 
 		return result;
 	}
@@ -274,7 +308,35 @@ public class TestCaseExecutor implements ThreadFactory {
 	 */
 	public ExecutionResult execute(TestCase tc, int timeout) {
 		Scope scope = new Scope();
-		ExecutionResult result = execute(tc, scope, timeout);
+		
+		ExecutionResult result;
+		ArgumentValueTraceObserver argsValueObserver = new ArgumentValueTraceObserver();
+		this.addObserver(argsValueObserver);
+		
+		if (SpecMiningUtils.checkLeak) { // shelling out to lsof is expensive. So let's not do that that often if we can help it. 
+			// we turn off checks for lsof if 1000 executions have passed without a leak.
+			// Usually, this is more than good enough to know that we are not dealing with a piece of software that can leak resources.
+			
+			long numFd = SpecMiningUtils.shelloutToLsof(SpecMiningUtils.pid());
+			result = execute(tc, scope, timeout);
+			
+			result.hasLeak = SpecMiningUtils.shelloutToLsof(SpecMiningUtils.pid()) != numFd;
+			if (!result.hasLeak) {
+				SpecMiningUtils.hasNotLeak += 1;
+				
+				if (SpecMiningUtils.hasNotLeak > 1000) {
+//					logger.warn("turning off checks for leaks");
+					SpecMiningUtils.checkLeak = false;
+				}
+			} else {
+				SpecMiningUtils.hasNotLeak = 0;
+			}
+		} else {
+			result = execute(tc, scope, timeout);
+		}
+		result.setTrace(argsValueObserver.getTrace(), ArgumentValueTraceEntry.class);
+		
+		TestCaseExecutor.getInstance().removeObserver(argsValueObserver);
 
 		if (Properties.RESET_STATIC_FIELDS) {
 			logger.debug("Resetting classes after execution");
@@ -330,12 +392,27 @@ public class TestCaseExecutor implements ThreadFactory {
 
 			Sandbox.goingToExecuteSUTCode();
 			TestGenerationContext.getInstance().goingToExecuteSUTCode();
+			
+			long numberOfResourcesNow = VirtualFileSystem.getInstance().getNumberOfLeakingResources();
+			OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
+	        if (os instanceof UnixOperatingSystemMXBean){
+	        	numberOfResourcesNow = ((UnixOperatingSystemMXBean) os).getOpenFileDescriptorCount();
+	        }
+
 			try {
 				result = handler.execute(callable, executor, timeout, Properties.CPU_TIMEOUT);
 			} finally {
 				Sandbox.doneWithExecutingSUTCode();
 				TestGenerationContext.getInstance().doneWithExecutingSUTCode();
 			}
+			
+			os = ManagementFactory.getOperatingSystemMXBean();
+	        if (os instanceof UnixOperatingSystemMXBean){
+	        	result.hasLeak = numberOfResourcesNow != ((UnixOperatingSystemMXBean) os).getOpenFileDescriptorCount();
+	        }
+	        
+//			result.hasLeak = numberOfResourcesNow != VirtualFileSystem.getInstance().getNumberOfLeakingResources();
+
 
 			PermissionStatistics.getInstance().countThreads(threadGroup.activeCount());
 			result.setSecurityException(PermissionStatistics.getInstance().getAndResetExceptionInfo());

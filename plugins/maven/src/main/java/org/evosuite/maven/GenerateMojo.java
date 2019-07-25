@@ -52,7 +52,7 @@ public class GenerateMojo extends AbstractMojo {
 	/**
 	 * Total Memory (in MB) that CTG will use
 	 */
-	@Parameter( property = "memoryInMB", defaultValue = "800" )
+	@Parameter( property = "memoryInMB", defaultValue = "4096" )
 	private int memoryInMB;
 
 	/**
@@ -91,8 +91,11 @@ public class GenerateMojo extends AbstractMojo {
 	 * Coverage criterion. Can define more than one criterion by using a ':' separated list
 	 */
 	// FIXME would be nice to have the value of Properties.CRITERION but seems to be not possible
-	@Parameter( property = "criterion", defaultValue = "LINE:BRANCH:EXCEPTION:WEAKMUTATION:OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH" )
+	@Parameter( property = "criterion", defaultValue = "LINE:BRANCH:EXCEPTION:WEAKMUTATION:OUTPUT:METHOD:METHODNOEXCEPTION:CBRANCH:LTLCOVERAGE:NOLEAK" )
 	private String criterion;
+	
+	@Parameter (property ="pathToLtlRules", defaultValue ="")
+	private String pathToLtlrules;
 
 	@Parameter(property = "spawnManagerPort", defaultValue = "")
 	private Integer spawnManagerPort;
@@ -135,6 +138,7 @@ public class GenerateMojo extends AbstractMojo {
 		getLog().info("Total memory: "+memoryInMB+"mb");
 		getLog().info("Time per class: "+timeInMinutesPerClass+" minutes");
 		getLog().info("Number of used cores: "+numberOfCores);
+		getLog().info("Path to LTL stuff: "+pathToLtlrules);
 		
 		if(cuts!=null){
 			getLog().info("Specified classes under test: "+cuts);
@@ -242,6 +246,7 @@ public class GenerateMojo extends AbstractMojo {
 		params.add("-target");
 		params.add(target);
 		params.add("-Dcriterion=" + criterion);
+		params.add("-Dpath_to_ltl_rules=" + pathToLtlrules);
 		params.add("-Dctg_schedule=" + schedule);
 		if (schedule.toUpperCase().equals(Properties.AvailableSchedule.HISTORY.toString())) {
 			try {

@@ -67,12 +67,12 @@ public class WriteDependencies {
 	private static void writeDependencies(String targetFile, String targetClass, 
 	        List<String> args) {
 		
-		if (!BytecodeInstrumentation.checkIfCanInstrument(targetClass)) {
-			throw new IllegalArgumentException(
-			        "Cannot consider "
-			                + targetClass
-			                + " because it belongs to one of the packages EvoSuite cannot currently handle");
-		}
+//		if (!BytecodeInstrumentation.checkIfCanInstrument(targetClass)) {
+//			throw new IllegalArgumentException(
+//			        "Cannot consider "
+//			                + targetClass
+//			                + " because it belongs to one of the packages EvoSuite cannot currently handle");
+//		}
 		String classPath = ClassPathHandler.getInstance().getEvoSuiteClassPath();
 		String cp = ClassPathHandler.getInstance().getTargetProjectClasspath();
 		classPath += File.pathSeparator + cp;

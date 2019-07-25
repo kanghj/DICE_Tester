@@ -19,6 +19,10 @@
  */
 package org.evosuite.rmi.service;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
@@ -41,11 +45,13 @@ import org.apache.commons.collections.list.SynchronizedList;
 import org.evosuite.*;
 import org.evosuite.Properties;
 import org.evosuite.Properties.NoSuchParameterException;
+import org.evosuite.assertion.CheapPurityAnalyzer;
 import org.evosuite.TestGenerationContext;
 import org.evosuite.TestSuiteGenerator;
 import org.evosuite.TimeController;
 import org.evosuite.classpath.ClassPathHandler;
 import org.evosuite.coverage.ClassStatisticsPrinter;
+import org.evosuite.coverage.ltl.LtlCoverageTestFitness;
 import org.evosuite.ga.Chromosome;
 import org.evosuite.ga.stoppingconditions.RMIStoppingCondition;
 import org.evosuite.junit.CoverageAnalysis;
@@ -136,6 +142,9 @@ public class ClientNodeImpl implements ClientNodeLocal, ClientNodeRemote {
 			throw new IllegalArgumentException("Search has already been started");
 		}
 
+		writePureMethodsToFileAndThrowIfNotPresent();
+
+		
 		/*
 		 * Needs to be done on separated thread, otherwise the master will block on this
 		 * function call until end of the search, even if it is on remote process
@@ -143,6 +152,8 @@ public class ClientNodeImpl implements ClientNodeLocal, ClientNodeRemote {
 		searchExecutor.submit(new Runnable() {
 			@Override
 			public void run() {
+				
+				
 				changeState(ClientState.STARTED);
 
 				//Before starting search, let's activate the sandbox
@@ -151,6 +162,7 @@ public class ClientNodeImpl implements ClientNodeLocal, ClientNodeRemote {
 				}
 				List<TestGenerationResult> results = new ArrayList<TestGenerationResult>();
 
+				
 				try {
 					// Starting a new search
 					TestSuiteGenerator generator = new TestSuiteGenerator();
@@ -186,10 +198,36 @@ public class ClientNodeImpl implements ClientNodeLocal, ClientNodeRemote {
 				 *  system test cases after the search
 				 */
 				//org.evosuite.runtime.System.fullReset();
+				
+				
 			}
+
+			
 		});
 	}
 
+	private void writePureMethodsToFileAndThrowIfNotPresent() {
+		// write the pure methods to file
+		String name = Properties.TARGET_CLASS.substring(Properties.TARGET_CLASS.lastIndexOf(".") + 1);
+		String testDir = Properties.TEST_DIR;
+		
+		List<String> pureMethods = CheapPurityAnalyzer.getInstance().getPureMethods(Properties.TARGET_CLASS);
+
+		if (!new File(testDir + File.separator + name + ".pures").exists()) {
+		
+			try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(testDir + File.separator + name + ".pures"))) {
+				for (String pure : pureMethods) {
+					bufferedWriter.write(pure);
+					bufferedWriter.write("\n");
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+				logger.error("error-ed trying to write pure methods to file. Please try again.");
+			}
+			throw new RuntimeException("This exception is expected. The pure methods have been written to file as part of preprocessing.");
+		}
+	}
+	
 	@Override
 	public void cancelCurrentSearch() throws RemoteException {
 		if (this.state == ClientState.INITIALIZATION) {
@@ -250,6 +288,8 @@ public class ClientNodeImpl implements ClientNodeLocal, ClientNodeRemote {
 			masterNode.evosuite_informChangeOfStateInClient(clientRmiIdentifier, state,information);
 		} catch (RemoteException e) {
 			logger.error("Cannot inform master of change of state", e);
+		} catch (Exception e) {
+			logger.error("Cannot inform master of change of state due to crazy error!!", e);
 		}
 
 		if (this.state.equals(ClientState.DONE)) {

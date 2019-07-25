@@ -739,6 +739,8 @@ public class SearchStatistics implements Listener<ClientStateInformation>{
             return individual.getCoverageInstanceOf(MethodCoverageSuiteFitness.class);
         }
     }
+    
+
 
     private static class MethodNoExceptionFitnessSequenceOutputVariableFactory extends SequenceOutputVariableFactory<Double> {
 

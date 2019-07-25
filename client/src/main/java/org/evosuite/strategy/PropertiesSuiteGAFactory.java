@@ -39,6 +39,7 @@ import org.evosuite.ga.metaheuristics.mulambda.MuPlusLambdaEA;
 import org.evosuite.ga.metaheuristics.mulambda.OnePlusLambdaLambdaGA;
 import org.evosuite.ga.metaheuristics.mulambda.OnePlusOneEA;
 import org.evosuite.ga.operators.crossover.CrossOverFunction;
+import org.evosuite.ga.operators.crossover.MiddleCrossOver;
 import org.evosuite.ga.operators.crossover.SinglePointCrossOver;
 import org.evosuite.ga.operators.crossover.SinglePointFixedCrossOver;
 import org.evosuite.ga.operators.crossover.SinglePointRelativeCrossOver;
@@ -91,14 +92,14 @@ public class PropertiesSuiteGAFactory extends PropertiesSearchAlgorithmFactory<T
 		case EVOSUITE:
 			switch (Properties.TEST_FACTORY) {
 			case ALLMETHODS:
-				logger.info("Using all methods chromosome factory");
+				logger.warn("Using all methods chromosome factory");
 				return new TestSuiteChromosomeFactory(
 				        new AllMethodsTestChromosomeFactory());
 			case RANDOM:
-				logger.info("Using random chromosome factory");
+				logger.warn("Using random chromosome factory");
 				return new TestSuiteChromosomeFactory(new RandomLengthTestFactory());
 			case ARCHIVE:
-				logger.info("Using archive chromosome factory");
+				logger.warn("Using archive chromosome factory");
 				return new TestSuiteChromosomeFactory(new ArchiveTestChromosomeFactory());
 			case JUNIT:
 				logger.info("Using seeding chromosome factory");
@@ -268,6 +269,8 @@ public class PropertiesSuiteGAFactory extends PropertiesSearchAlgorithmFactory<T
 			return new org.evosuite.ga.operators.crossover.CoverageCrossOver();
 		case UNIFORM:
 			return new UniformCrossOver();
+		case MIDDLE:
+		    return new MiddleCrossOver();
 		default:
 			throw new RuntimeException("Unknown crossover function: "
 			        + Properties.CROSSOVER_FUNCTION);

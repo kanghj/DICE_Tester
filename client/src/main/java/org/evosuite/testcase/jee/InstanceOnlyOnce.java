@@ -46,6 +46,10 @@ public class InstanceOnlyOnce {
                 return true;
             }
         }
+        if(org.evosuite.Properties.getTargetClassAndDontInitialise().isAssignableFrom(klass)){
+            return true;
+        }
+        
         return false;
     }
 }

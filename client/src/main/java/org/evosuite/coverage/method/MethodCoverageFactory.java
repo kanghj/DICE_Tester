@@ -86,7 +86,9 @@ public class MethodCoverageFactory extends
 				goals.add(new MethodCoverageTestFitness(className, methodName));
 			}
 		}
-		Method[] allMethods = clazz.getDeclaredMethods();
+//		Method[] allMethods = clazz.getDeclaredMethods();
+		
+		Method[] allMethods = clazz.getMethods();
 		for (Method m : allMethods) {
 			if (TestUsageChecker.canUse(m)) {
 				if(clazz.isEnum()) {
@@ -105,7 +107,8 @@ public class MethodCoverageFactory extends
 					logger.info("Method {} does not match criteria. ",methodName);
 					continue;
 				}
-				logger.info("Adding goal for method " + className + "." + methodName);
+//				logger.warn("Adding goal for method " + className + "." + methodName);
+//				logger.warn("This looks like  " + new MethodCoverageTestFitness(className, methodName));
 				goals.add(new MethodCoverageTestFitness(className, methodName));
 			}
 		}

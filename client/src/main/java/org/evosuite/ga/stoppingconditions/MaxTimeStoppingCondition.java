@@ -71,6 +71,12 @@ public class MaxTimeStoppingCondition extends StoppingConditionImpl {
 	@Override
 	public void setLimit(long limit) {
 		maxSeconds = limit;
+		
+		try {
+			throw new RuntimeException("set limit called");
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/** {@inheritDoc} */

@@ -165,6 +165,12 @@ public class CoverageCriteriaAnalyzer {
                 return RuntimeVariable.MethodCoverage;
             case METHODNOEXCEPTION:
                 return RuntimeVariable.MethodNoExceptionCoverage;
+            case LTLCOVERAGE:
+            	return RuntimeVariable.LtlCoverage;
+            case NOLEAK:
+            	return RuntimeVariable.NoLeak;
+            case METHODPAIR:
+            
             case ONLYLINE:
             case LINE:
                 return RuntimeVariable.LineCoverage;

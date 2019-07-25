@@ -69,6 +69,8 @@ public abstract class AssertionGenerator {
 	protected static final PrimitiveFieldTraceObserver fieldObserver = new PrimitiveFieldTraceObserver();
 
 	protected static final NullTraceObserver nullObserver = new NullTraceObserver();
+	
+	protected static final ArgumentValueTraceObserver argumentValuesObserver = new ArgumentValueTraceObserver();
 
 	protected static final ArrayTraceObserver arrayObserver = new ArrayTraceObserver();
 
@@ -87,6 +89,7 @@ public abstract class AssertionGenerator {
 		TestCaseExecutor.getInstance().addObserver(inspectorObserver);
 		TestCaseExecutor.getInstance().addObserver(fieldObserver);
 		TestCaseExecutor.getInstance().addObserver(nullObserver);
+		TestCaseExecutor.getInstance().addObserver(argumentValuesObserver);
 		TestCaseExecutor.getInstance().addObserver(sameObserver);
 		if(!Properties.isRegression())
 			TestCaseExecutor.getInstance().addObserver(arrayObserver);
@@ -140,6 +143,7 @@ public abstract class AssertionGenerator {
 			result.setTrace(inspectorObserver.getTrace(), InspectorTraceEntry.class);
 			result.setTrace(fieldObserver.getTrace(), PrimitiveFieldTraceEntry.class);
 			result.setTrace(nullObserver.getTrace(), NullTraceEntry.class);
+			result.setTrace(argumentValuesObserver.getTrace(), ArgumentValueTraceEntry.class);
 			result.setTrace(sameObserver.getTrace(), SameTraceEntry.class);
 			if(!Properties.isRegression())
 				result.setTrace(arrayObserver.getTrace(), ArrayTraceEntry.class);

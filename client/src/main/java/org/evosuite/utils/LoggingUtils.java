@@ -99,7 +99,7 @@ public class LoggingUtils {
 	 * @param logger
 	 * @param message
 	 */
-	@Deprecated
+	
 	public static void logWarnAtMostOnce(Logger logger, String message){
 		AtMostOnceLogger.warn(logger, message);
 	}

@@ -181,10 +181,10 @@ public class BytecodeInstrumentation {
 			cv = new StaticAccessClassAdapter(cv, className);
 		}
 
-		if (Properties.PURE_INSPECTORS) {
+//		if (Properties.PURE_INSPECTORS) {
 			CheapPurityAnalyzer purityAnalyzer = CheapPurityAnalyzer.getInstance();
 			cv = new PurityAnalysisClassVisitor(cv, className, purityAnalyzer);
-		}
+//		}
 
 		if (Properties.MAX_LOOP_ITERATIONS >= 0) {
 			cv = new LoopCounterClassAdapter(cv);

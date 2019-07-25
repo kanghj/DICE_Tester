@@ -162,6 +162,17 @@ public enum RuntimeVariable {
     MethodNoExceptionFitnessTimeline,
     MethodNoExceptionCoverageTimeline,
     MethodNoExceptionCoverageBitString,
+    
+    /** Obtained FSA coverage  */
+//    FsaTransitionCoverage,
+//    FsaTransitionFitnessTimeline,
+//    FsaTransitionCoverageTimeline,
+//    FsaTransitionCoverageBitString,
+    
+    
+    LtlCoverage,
+    NoLeak,
+    
 	/** The obtained line coverage */
 	LineCoverage,
     LineFitnessTimeline,

@@ -286,7 +286,7 @@ public class ResourceList {
      * @return
      */
     public Set<String> getAllClasses(String classPathEntry, String prefix, boolean includeInternalClasses){
-        return getAllClasses(classPathEntry,prefix,includeInternalClasses,true);
+        return getAllClasses(classPathEntry,prefix, true,true);
     }
 
 

@@ -55,7 +55,7 @@ public class RankBasedPreferenceSorting<T extends Chromosome> implements Ranking
 	@Override
 	public void computeRankingAssignment(List<T> solutions, Set<FitnessFunction<T>> uncovered_goals) {
 		if (solutions.isEmpty()) {
-			logger.debug("solution is empty");
+			logger.warn("solution is empty");
 			return;
 		}
 

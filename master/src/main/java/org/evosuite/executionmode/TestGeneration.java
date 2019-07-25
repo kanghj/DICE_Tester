@@ -55,6 +55,8 @@ public class TestGeneration {
 	public static List<List<TestGenerationResult>> executeTestGeneration(Options options, List<String> javaOpts,
 			CommandLine line) {
 		
+		
+		LoggingUtils.getEvoLogger().info("* Search budget on master -executeTestGeneration " + Properties.SEARCH_BUDGET);
 		Strategy strategy = getChosenStrategy(javaOpts, line);
 
 		if (strategy == null) {
@@ -214,17 +216,18 @@ public class TestGeneration {
 		
 		LoggingUtils.getEvoLogger().info("* Going to generate test cases for class: "+target);
 		
+		
 		if (!findTargetClass(target)) {
 		    return Arrays.asList(Arrays.asList(new TestGenerationResult[]{TestGenerationResultBuilder.buildErrorResult("Could not find target class") }));
 		}
 
-
-		if (!BytecodeInstrumentation.checkIfCanInstrument(target)) {
-			throw new IllegalArgumentException(
-			        "Cannot consider "
-			                + target
-			                + " because it belongs to one of the packages EvoSuite cannot currently handle");
-		}
+//
+//		if (!BytecodeInstrumentation.checkIfCanInstrument(target)) {
+//			throw new IllegalArgumentException(
+//			        "Cannot consider "
+//			                + target
+//			                + " because it belongs to one of the packages EvoSuite cannot currently handle");
+//		}
 
         final String DISABLE_ASSERTIONS_EVO = "-da:"+PackageInfo.getEvoSuitePackage()+"...";
         final String ENABLE_ASSERTIONS_EVO = "-ea:"+PackageInfo.getEvoSuitePackage()+"...";
@@ -245,6 +248,7 @@ public class TestGeneration {
             Properties.NUM_PARALLEL_CLIENTS = 1;
         }
 
+        
         LoggingUtils[] logServer = new LoggingUtils[Properties.NUM_PARALLEL_CLIENTS];
 		ExternalProcessGroupHandler handler = new ExternalProcessGroupHandler(Properties.NUM_PARALLEL_CLIENTS);
 		int port = handler.openServer();
@@ -260,6 +264,10 @@ public class TestGeneration {
 		}
 		cmdLine.add("-Dlogback.configurationFile="+LoggingUtils.getLogbackFileName());
 		cmdLine.add("-Dlog4j.configuration=SUT.log4j.properties");
+		
+		
+		// ltl stuff
+		cmdLine.add("-Dpath_to_ltl_rules=" + Properties.PATH_TO_LTL_RULES);
 		
 		/*
 		 * FIXME: following 3 should be refactored, as not particularly clean.
@@ -311,6 +319,7 @@ public class TestGeneration {
 				cmdLine.add(arg);
 			}
 		}
+		
 
 		switch (strategy) {
 		case EVOSUITE:
@@ -384,6 +393,8 @@ public class TestGeneration {
 		Properties.getInstance();// should force the load, just to be sure
 		Properties.TARGET_CLASS = target;
 		Properties.PROCESS_COMMUNICATION_PORT = port;
+		
+		LoggingUtils.getEvoLogger().info("* Search budget on master " + Properties.SEARCH_BUDGET);
 
         for (int i = 0; i < Properties.NUM_PARALLEL_CLIENTS; i++) {
             List<String> cmdLineClone = new ArrayList<>(cmdLine);
@@ -512,7 +523,7 @@ public class TestGeneration {
 				}
 
 				int time = TimeController.getInstance().calculateForHowLongClientWillRunInSeconds();
-				handler.waitForResult(time * 1000); 
+				handler.waitForResult(time * 1500 + 120000); // HJ: randomly add more time... 0.5 seconds more for each second, and an additional 2 mins
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {

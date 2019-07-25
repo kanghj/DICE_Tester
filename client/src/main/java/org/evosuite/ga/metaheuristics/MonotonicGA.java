@@ -225,6 +225,7 @@ public class MonotonicGA<T extends Chromosome> extends GeneticAlgorithm<T> {
 		}
 
 		logger.debug("Starting evolution");
+		printBudget();
 		int starvationCounter = 0;
 		double bestFitness = Double.MAX_VALUE;
 		double lastBestFitness = Double.MAX_VALUE;

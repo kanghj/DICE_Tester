@@ -23,6 +23,9 @@ import org.evosuite.ClientProcess;
 import org.evosuite.Properties;
 import org.evosuite.Properties.Criterion;
 import org.evosuite.coverage.TestFitnessFactory;
+import org.evosuite.coverage.ltl.LtlCoverageTestFitness;
+import org.evosuite.coverage.specmining.LTLFitnessFunctionsAgeingSearchListener;
+import org.evosuite.coverage.specmining.SpecMiningTraceReporter;
 import org.evosuite.ga.ChromosomeFactory;
 import org.evosuite.ga.FitnessFunction;
 import org.evosuite.ga.metaheuristics.GeneticAlgorithm;
@@ -84,6 +87,8 @@ public class MOSuiteStrategy extends TestGenerationStrategy {
 		algorithm.addListener(progressMonitor); // FIXME progressMonitor may cause
 		// client hang if EvoSuite is
 		// executed with -prefix!
+		algorithm.addListener(new SpecMiningTraceReporter());
+		algorithm.addListener(new LTLFitnessFunctionsAgeingSearchListener());
 		
 //		List<TestFitnessFunction> goals = getGoals(true);
 		LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Total number of test goals for {}: {}",
@@ -104,6 +109,8 @@ public class MOSuiteStrategy extends TestGenerationStrategy {
 
 		algorithm.resetStoppingConditions();
 		
+		LtlCoverageTestFitness.covered.clear();
+		
 		TestSuiteChromosome testSuite = null;
 
 		if (!(Properties.STOP_ZERO && fitnessFunctions.isEmpty()) || ArrayUtil.contains(Properties.CRITERION, Criterion.EXCEPTION)) {
@@ -115,6 +122,8 @@ public class MOSuiteStrategy extends TestGenerationStrategy {
 			algorithm.generateSolution();
 
 			testSuite = (TestSuiteChromosome) algorithm.getBestIndividual();
+			LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Obtained Test Suite. Size=" + testSuite.getTestChromosomes().size());
+
 			if (testSuite.getTestChromosomes().isEmpty()) {
 				LoggingUtils.getEvoLogger().warn(ClientProcess.getPrettyPrintIdentifier() + "Could not generate any test case");
 			}

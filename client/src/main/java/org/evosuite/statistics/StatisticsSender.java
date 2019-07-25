@@ -28,6 +28,12 @@ import java.util.Set;
 
 import org.evosuite.Properties;
 import org.evosuite.TestGenerationContext;
+import org.evosuite.assertion.ArgumentValueTraceEntry;
+import org.evosuite.assertion.ArgumentValueTraceObserver;
+import org.evosuite.assertion.NullTraceEntry;
+import org.evosuite.assertion.NullTraceObserver;
+import org.evosuite.assertion.PrimitiveTraceEntry;
+import org.evosuite.assertion.PrimitiveTraceObserver;
 import org.evosuite.coverage.branch.Branch;
 import org.evosuite.coverage.branch.BranchPool;
 import org.evosuite.coverage.exception.ExceptionCoverageSuiteFitness;
@@ -88,8 +94,25 @@ public class StatisticsSender {
 
 		for (TestChromosome test : testSuite.getTestChromosomes()) {
 			if (test.getLastExecutionResult() == null) {
+				PrimitiveTraceObserver primitiveObserver = new PrimitiveTraceObserver();
+				NullTraceObserver nullObserver = new NullTraceObserver();
+				ArgumentValueTraceObserver argsValueObserver = new ArgumentValueTraceObserver();
+				TestCaseExecutor.getInstance().addObserver(primitiveObserver);
+				TestCaseExecutor.getInstance().addObserver(nullObserver);
+				TestCaseExecutor.getInstance().addObserver(argsValueObserver);
+				
 				ExecutionResult result = TestCaseExecutor.runTest(test.getTestCase());
 				test.setLastExecutionResult(result);
+				
+				result.setTrace(primitiveObserver.getTrace(), PrimitiveTraceEntry.class);
+				result.setTrace(nullObserver.getTrace(), NullTraceEntry.class);
+				result.setTrace(argsValueObserver.getTrace(), ArgumentValueTraceEntry.class);
+
+				
+				TestCaseExecutor.getInstance().removeObserver(primitiveObserver);
+				TestCaseExecutor.getInstance().removeObserver(nullObserver);
+				TestCaseExecutor.getInstance().removeObserver(argsValueObserver);
+
 			}
 		}
 

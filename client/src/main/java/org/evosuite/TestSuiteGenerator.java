@@ -21,7 +21,14 @@ package org.evosuite;
 
 import org.evosuite.Properties.AssertionStrategy;
 import org.evosuite.Properties.Criterion;
+import org.evosuite.Properties.Strategy;
 import org.evosuite.Properties.TestFactory;
+import org.evosuite.assertion.ArgumentValueTraceEntry;
+import org.evosuite.assertion.ArgumentValueTraceObserver;
+import org.evosuite.assertion.NullTraceEntry;
+import org.evosuite.assertion.NullTraceObserver;
+import org.evosuite.assertion.PrimitiveTraceEntry;
+import org.evosuite.assertion.PrimitiveTraceObserver;
 import org.evosuite.classpath.ClassPathHandler;
 import org.evosuite.classpath.ResourceList;
 import org.evosuite.contracts.ContractChecker;
@@ -30,6 +37,9 @@ import org.evosuite.coverage.CoverageCriteriaAnalyzer;
 import org.evosuite.coverage.FitnessFunctions;
 import org.evosuite.coverage.TestFitnessFactory;
 import org.evosuite.coverage.dataflow.DefUseCoverageSuiteFitness;
+import org.evosuite.coverage.ltl.LtlCoverageTestFitness;
+import org.evosuite.coverage.specmining.SpecMiningTraceReporter;
+import org.evosuite.coverage.specmining.SpecMiningUtils;
 import org.evosuite.ga.metaheuristics.GeneticAlgorithm;
 import org.evosuite.ga.stoppingconditions.StoppingCondition;
 import org.evosuite.junit.JUnitAnalyzer;
@@ -42,6 +52,8 @@ import org.evosuite.rmi.ClientServices;
 import org.evosuite.rmi.service.ClientState;
 import org.evosuite.runtime.LoopCounter;
 import org.evosuite.runtime.sandbox.PermissionStatistics;
+import org.evosuite.runtime.util.AtMostOnceLogger;
+import org.evosuite.runtime.vfs.VirtualFileSystem;
 import org.evosuite.seeding.ObjectPool;
 import org.evosuite.seeding.ObjectPoolManager;
 import org.evosuite.setup.DependencyAnalysis;
@@ -74,10 +86,18 @@ import org.evosuite.utils.generic.GenericMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.management.UnixOperatingSystemMXBean;
+
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.lang.reflect.Method;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Main entry point. Does all the static analysis, invokes a test generation
@@ -118,15 +138,23 @@ public class TestSuiteGenerator {
 	 * @return a {@link java.lang.String} object.
 	 */
 	public TestGenerationResult generateTestSuite() {
-
+//			Properties.STRATEGY = Properties.Strategy.RANDOM;
+		LoggingUtils.getEvoLogger().info("* SEARCH with  " + Properties.STRATEGY);
+		LoggingUtils.getEvoLogger().info("* VIRTUAL FS is " + Properties.VIRTUAL_FS);
+			LoggingUtils.getEvoLogger().info("* VIRTUAL NET is " + Properties.VIRTUAL_NET);
 		LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Analyzing classpath: ");
 
+		
+		
 		ClientServices.getInstance().getClientNode().changeState(ClientState.INITIALIZATION);
 
 		// Deactivate loop counter to make sure classes initialize properly
 		LoopCounter.getInstance().setActive(false);
 		ExceptionMapGenerator.initializeExceptionMap(Properties.TARGET_CLASS);
 
+		SpecMiningUtils.seedConstants();
+
+		
 		TestCaseExecutor.initExecutor();
 		try {
 			initializeTargetClass();
@@ -574,6 +602,8 @@ public class TestSuiteGenerator {
 	 */
 	private void compileAndCheckTests(TestSuiteChromosome chromosome) {
 		LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Compiling and checking tests");
+		
+		
 
 		if (!JUnitAnalyzer.isJavaCompilerAvailable()) {
 			String msg = "No Java compiler is available. Make sure to run EvoSuite with the JDK and not the JRE."
@@ -603,6 +633,11 @@ public class TestSuiteGenerator {
 
 		// first, let's just get rid of all the tests that do not compile
 		JUnitAnalyzer.removeTestsThatDoNotCompile(testCases);
+		
+		boolean HJSkip = true;
+		if (HJSkip) {
+			return;
+		}
 
 		// compile and run each test one at a time. and keep track of total time
 		long start = java.lang.System.currentTimeMillis();
@@ -672,6 +707,7 @@ public class TestSuiteGenerator {
 			TestCaseExecutor.getInstance().addObserver(checker);
 		}
 
+		Properties.STRATEGY = Strategy.MOSUITE;
 		TestGenerationStrategy strategy = TestSuiteGeneratorHelper.getTestGenerationStrategy();
 		TestSuiteChromosome testSuite = strategy.generateTests();
 
@@ -717,13 +753,84 @@ public class TestSuiteGenerator {
 
 			String name = Properties.TARGET_CLASS.substring(Properties.TARGET_CLASS.lastIndexOf(".") + 1);
 			String testDir = Properties.TEST_DIR;
+			
+			// write traces to file here!
+			try {
+				new File(testDir + File.separator ).mkdirs();
 
+				logger.warn("Writing traces to file");
+				
+				if (true) {
+//					logger.warn("WRITE traces to file");
+					List<ExecutionResult> results = new ArrayList<>();
+					List<Boolean> hasLeaks = new ArrayList<>();
+					for (TestChromosome test : testSuite.getTestChromosomes()) {
+						
+						if (test.getLastExecutionResult() == null) {
+							PrimitiveTraceObserver primitiveObserver = new PrimitiveTraceObserver();
+							NullTraceObserver nullObserver = new NullTraceObserver();
+							ArgumentValueTraceObserver argsValueObserver = new ArgumentValueTraceObserver();
+							
+							TestCaseExecutor.getInstance().addObserver(primitiveObserver);
+							TestCaseExecutor.getInstance().addObserver(nullObserver);
+							TestCaseExecutor.getInstance().addObserver(argsValueObserver);							
+							AtMostOnceLogger.warn(logger, "re-running test in order to get trace. Added PrimitiveTraceObserver, NullTraceObserver, argsValueObserver");
+			
+							ExecutionResult result = TestCaseExecutor.runTest(test.getTestCase());
+							result.setTrace(primitiveObserver.getTrace(), PrimitiveTraceEntry.class);
+							result.setTrace(nullObserver.getTrace(), NullTraceEntry.class);
+							result.setTrace(argsValueObserver.getTrace(), ArgumentValueTraceEntry.class);
+							
+					        boolean hasLeak = result.hasLeak;
+					        
+							results.add(result);
+							hasLeaks.add(hasLeak);
+							
+							TestCaseExecutor.getInstance().removeObserver(primitiveObserver);
+							TestCaseExecutor.getInstance().removeObserver(nullObserver);
+							TestCaseExecutor.getInstance().removeObserver(argsValueObserver);
+						} else {
+							results.add(test.getLastExecutionResult());
+							hasLeaks.add(test.getLastExecutionResult().hasLeak);
+						}
+					}
+					SpecMiningUtils.writeTracesToFile(tests, results, hasLeaks,
+							"." + File.separator);
+					logger.warn("WRITE traces to file DONE");
+
+				}
+				
+//				FsaUtils.writeSeperataor();
+				logger.warn("Writing counter-examples");
+				SpecMiningUtils.writeCounterExampledProperties(LtlCoverageTestFitness.covered);
+
+				logger.warn("Writing throwables to file");
+				SpecMiningUtils.writeThrowablesToFile();
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+				logger.error("CANNOT WRITE TRACES");
+				logger.error("Due to ", e);
+			} finally {
+				try {
+					logger.error("Closing traces file");
+					SpecMiningUtils.closeTraceFiles();
+				} catch (IOException e) {
+					// 
+					e.printStackTrace();
+					logger.error("CANNOT Close traces file");
+					logger.error("Due to ", e);
+				}
+			}
+			
 			LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Writing JUnit test case '"
                     + (name + suffix) + "' to " + testDir);
 			suiteWriter.writeTestSuite(name + suffix, testDir, testSuite.getLastExecutionResults());
 		}
 		return TestGenerationResultBuilder.buildSuccessResult();
 	}
+	
+	
 
 	/**
 	 * 
@@ -758,9 +865,13 @@ public class TestSuiteGenerator {
 			suiteWriter.insertAllTests(suite.getTests());
 			FailingTestSet.writeJUnitTestSuite(suiteWriter);
 
+	
+			
 			suiteWriter.writeTestSuite(name + Properties.JUNIT_FAILED_SUFFIX, testDir, suite.getLastExecutionResults());
 		}
 	}
+	
+	
 
 	private void writeObjectPool(TestSuiteChromosome suite) {
 		if (!Properties.WRITE_POOL.isEmpty()) {

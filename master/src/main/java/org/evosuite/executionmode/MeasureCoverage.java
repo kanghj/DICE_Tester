@@ -74,12 +74,12 @@ public class MeasureCoverage {
 							+ ". Be sure its full qualifying name is correct and the classpath is properly set with '-projectCP'");
 		}
 
-		if (!BytecodeInstrumentation.checkIfCanInstrument(targetClass)) {
-			throw new IllegalArgumentException(
-			        "Cannot consider "
-			                + targetClass
-			                + " because it belongs to one of the packages EvoSuite cannot currently handle");
-		}
+//		if (!BytecodeInstrumentation.checkIfCanInstrument(targetClass)) {
+//			throw new IllegalArgumentException(
+//			        "Cannot consider "
+//			                + targetClass
+//			                + " because it belongs to one of the packages EvoSuite cannot currently handle");
+//		}
 
 		measureCoverage(targetClass, args);
 	}
