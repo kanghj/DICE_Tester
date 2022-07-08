@@ -56,7 +56,6 @@ public class TestGeneration {
 			CommandLine line) {
 		
 		
-		LoggingUtils.getEvoLogger().info("* Search budget on master -executeTestGeneration " + Properties.SEARCH_BUDGET);
 		Strategy strategy = getChosenStrategy(javaOpts, line);
 
 		if (strategy == null) {
