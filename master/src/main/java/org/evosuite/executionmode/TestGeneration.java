@@ -55,7 +55,6 @@ public class TestGeneration {
 	public static List<List<TestGenerationResult>> executeTestGeneration(Options options, List<String> javaOpts,
 			CommandLine line) {
 		
-		
 		Strategy strategy = getChosenStrategy(javaOpts, line);
 
 		if (strategy == null) {
@@ -214,8 +213,7 @@ public class TestGeneration {
 	        List<String> args) {
 		
 		LoggingUtils.getEvoLogger().info("* Going to generate test cases for class: "+target);
-		
-		
+			
 		if (!findTargetClass(target)) {
 		    return Arrays.asList(Arrays.asList(new TestGenerationResult[]{TestGenerationResultBuilder.buildErrorResult("Could not find target class") }));
 		}
@@ -246,8 +244,7 @@ public class TestGeneration {
         if (Properties.NUM_PARALLEL_CLIENTS < 1) {
             Properties.NUM_PARALLEL_CLIENTS = 1;
         }
-
-        
+     
         LoggingUtils[] logServer = new LoggingUtils[Properties.NUM_PARALLEL_CLIENTS];
 		ExternalProcessGroupHandler handler = new ExternalProcessGroupHandler(Properties.NUM_PARALLEL_CLIENTS);
 		int port = handler.openServer();

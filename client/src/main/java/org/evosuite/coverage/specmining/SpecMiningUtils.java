@@ -103,7 +103,6 @@ public class SpecMiningUtils {
 			return true;
 		}
 		methodName = methodName.split("\\(")[0];
-//		LoggingUtils.logWarnAtMostOnce(logger, "Checking if method is in vocab: " + methodName + ". Result= " + vocab.contains(methodName));
 
 		return vocab.contains(methodName);
 	}
@@ -438,7 +437,7 @@ public class SpecMiningUtils {
 			
 			for (Class<?> superInterface : interfaceObject.getInterfaces()) {
 				addToClassOfVar(classOfVar, objectName, superInterface);	
-//				LoggingUtils.logWarnAtMostOnce(logger, "super interface=" + superInterface +" of=" + interfaceObject.getSuperclass());
+
 			}
 			
 			if (interfaceObject.getSuperclass() == null) {

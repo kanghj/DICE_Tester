@@ -140,6 +140,7 @@ public class TestSuiteGenerator {
 	public TestGenerationResult generateTestSuite() {
 //			Properties.STRATEGY = Properties.Strategy.RANDOM;
 		LoggingUtils.getEvoLogger().info("* SEARCH with  " + Properties.STRATEGY);
+
 		LoggingUtils.getEvoLogger().info("* VIRTUAL FS is " + Properties.VIRTUAL_FS);
 			LoggingUtils.getEvoLogger().info("* VIRTUAL NET is " + Properties.VIRTUAL_NET);
 		LoggingUtils.getEvoLogger().info("* " + ClientProcess.getPrettyPrintIdentifier() + "Analyzing classpath: ");
@@ -761,7 +762,7 @@ public class TestSuiteGenerator {
 				logger.warn("Writing traces to file");
 				
 				if (true) {
-//					logger.warn("WRITE traces to file");
+
 					List<ExecutionResult> results = new ArrayList<>();
 					List<Boolean> hasLeaks = new ArrayList<>();
 					for (TestChromosome test : testSuite.getTestChromosomes()) {
