@@ -181,6 +181,7 @@ public class ClientNodeImpl implements ClientNodeLocal, ClientNodeRemote {
 							+ Properties.CONFIGURATION_ID, t);
 					results.add(TestGenerationResultBuilder.buildErrorResult("Error when generating tests for: "
                             + Properties.TARGET_CLASS+": "+t));
+					writePureMethodsToFileAndThrowIfNotPresent();
 				}
 
 				changeState(ClientState.DONE);
