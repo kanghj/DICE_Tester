@@ -142,7 +142,7 @@ public class ClientNodeImpl implements ClientNodeLocal, ClientNodeRemote {
 			throw new IllegalArgumentException("Search has already been started");
 		}
 
-		writePureMethodsToFileAndThrowIfNotPresent();
+		
 
 		
 		/*
@@ -161,7 +161,6 @@ public class ClientNodeImpl implements ClientNodeLocal, ClientNodeRemote {
 					Sandbox.initializeSecurityManagerForSUT();
 				}
 				List<TestGenerationResult> results = new ArrayList<TestGenerationResult>();
-
 				
 				try {
 					// Starting a new search
@@ -171,6 +170,10 @@ public class ClientNodeImpl implements ClientNodeLocal, ClientNodeRemote {
 					// GeneticAlgorithm<?> ga = generator.getEmployedGeneticAlgorithm();
 
 					masterNode.evosuite_collectTestGenerationResult(clientRmiIdentifier, results);
+					
+					// don't continue creating tests yet if the pure methods file isn't present!
+					// we haven't finish preprocessing
+					writePureMethodsToFileAndThrowIfNotPresent();
 				} catch (Throwable t) {
 					logger.error("Error when generating tests for: "
 							+ Properties.TARGET_CLASS + " with seed "

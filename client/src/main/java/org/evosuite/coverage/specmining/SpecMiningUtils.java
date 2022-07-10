@@ -74,26 +74,30 @@ public class SpecMiningUtils {
 		
 		name = name.substring(name.lastIndexOf(".") + 1);
 		String filePath = name.toLowerCase() + ".vocab.txt";
-		try (BufferedReader br = new BufferedReader(
-				new FileReader(
-						filePath))
-			) {
-				String st; 
-				while ((st = br.readLine()) != null)  {
-					  vocab.add(st.trim());
-				} 
-				
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			} catch (IOException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			}
-		LoggingUtils.logWarnAtMostOnce(
-			logger, 
-			"vocab initialized! " + " size="+ vocab.size() + ". Init from " 
-			+ filePath);
+		
+		if (new File(filePath).exists()) {
+			try (BufferedReader br = new BufferedReader(
+					new FileReader(
+							filePath))
+				) {
+					String st; 
+					while ((st = br.readLine()) != null)  {
+						  vocab.add(st.trim());
+					} 
+					
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+					throw new RuntimeException(e);
+				} catch (IOException e) {
+					e.printStackTrace();
+					throw new RuntimeException(e);
+				}
+			
+			LoggingUtils.logWarnAtMostOnce(
+				logger, 
+				"vocab initialized! " + " size="+ vocab.size() + ". Init from " 
+				+ filePath);
+		}
 		
 	}
 	
