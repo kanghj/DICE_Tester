@@ -103,7 +103,7 @@ public class SpecMiningUtils {
 	
 	public static boolean isInVocab(String methodName) {
 		if (!isVocabInitialized() ) {
-			LoggingUtils.logWarnAtMostOnce(logger, "No vocab, so return true to everything "+ methodName );
+			LoggingUtils.logWarnAtMostOnce(logger, "No vocab, so will permit any method call");
 			return true;
 		}
 		methodName = methodName.split("\\(")[0];
