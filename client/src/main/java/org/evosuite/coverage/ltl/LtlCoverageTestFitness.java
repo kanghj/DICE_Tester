@@ -164,6 +164,15 @@ public class LtlCoverageTestFitness extends TestFitnessFunction {
 	       		continue;
 	       	}
 	       	
+	       	boolean sanityCheck = false;
+	       	for (String methodCall : entry.getValue()) {
+	       		if (methodCall.contains("init>")) {
+	       			sanityCheck = true;
+	       		}
+	       	}
+	       	if (!sanityCheck) {
+	       		continue;
+	       	}
 
 	       	float traceValue = 1.0f;
 	       	if (this.label.equals("NIF")) {
@@ -183,15 +192,8 @@ public class LtlCoverageTestFitness extends TestFitnessFunction {
 	       	}
 	       	fitness = Math.min(fitness, traceValue);   	
 	       	if (fitness == 0.0 && !covered.contains(this.convenientLTLForm())) {
-//	            logger.warn("covering trace of " + this + " is ");
-//	            logger.warn("\t variable is " + entry.getKey());
-//	            logger.warn("\t " + entry.getValue());
-//	            logger.warn("\t debug info is " + tracesDebugInfo.get(entry.getKey()));
-//	            logger.warn("exceptional positions" + exceptionPositions);
-
 	            
-	            covered.add(this.convenientLTLForm());
-	            
+	            covered.add(this.convenientLTLForm());            
 	            
 	            try {
 	            	SpecMiningUtils.writeTracesToFile( entry.getValue(), Properties.getTargetClassAndDontInitialise(), "./");
@@ -200,7 +202,14 @@ public class LtlCoverageTestFitness extends TestFitnessFunction {
 					logger.error("cannot write to traces file", e);
 				}
 	            break;
-	            
+	       	}
+	       	else if (fitness < 0.3) {
+	       		try {
+	            	SpecMiningUtils.writeTracesToFile( entry.getValue(), Properties.getTargetClassAndDontInitialise(), "./");
+				} catch (IOException e) {
+					e.printStackTrace();
+					logger.error("cannot write to traces file", e);
+				}
 	       	}
         }
         

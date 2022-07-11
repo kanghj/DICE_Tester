@@ -730,7 +730,19 @@ public class SpecMiningUtils {
 		    			
 		    			alreadyWritten.add(filtered);
 		    			
+		    			boolean sanityCheck = false;
+		    	       	for (String methodCall : filtered) {
+		    	       		if (methodCall.contains("init>")) {
+		    	       			sanityCheck = true;
+		    	       		}
+		    	       	}
+		    	       	if (!sanityCheck) {
+		    	       		continue;
+		    	       	}
+		    	       	
 		    			String trace = 	String.join(" ", filtered);
+
+		    	       	
 		    			bufferedWriter.write("<START> ");
 			    		bufferedWriter.write(trace);
 			    		bufferedWriter.write(" <END>\n");
