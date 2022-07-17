@@ -25,7 +25,6 @@ import org.evosuite.assertion.NullTraceEntry;
 import org.evosuite.assertion.OutputTrace;
 import org.evosuite.assertion.OutputTraceEntry;
 import org.evosuite.assertion.PrimitiveTraceEntry;
-import org.evosuite.ga.metaheuristics.mosa.structural.MultiCriteriaManager;
 import org.evosuite.seeding.ConstantPoolManager;
 import org.evosuite.testcase.TestCase;
 import org.evosuite.testcase.execution.ExecutionResult;
@@ -111,11 +110,11 @@ public class SpecMiningUtils {
 		return vocab.contains(methodName);
 	}
 	
-	public static boolean isInit(ExecutionResult result, Statement stmt, boolean isExceptionThrownByStmt, TestCase test) {
+	public static boolean isPossibleInit(ExecutionResult result, Statement stmt, boolean isExceptionThrownByStmt, TestCase test) {
 		if (stmt instanceof MethodStatement) {
 			MethodStatement ms = (MethodStatement) stmt;
 			
-			return ms.isStatic(); // TODO this is just a bad heuristic that if a method is static, it *might* be for initialization..
+			return ms.isStatic(); // TODO this is just a heuristic that says that if a method is static, it *might* be for initialization..
 			
 		}
 		
@@ -577,7 +576,7 @@ public class SpecMiningUtils {
     					test);
 //    			logger.warn("method name looks like >" + methodName + "<");
     			
-    			boolean isInit = SpecMiningUtils.isInit(result, stmt, isExceptionThrownByStmt, test);
+    			boolean isInit = SpecMiningUtils.isPossibleInit(result, stmt, isExceptionThrownByStmt, test);
     			
     			if (methodName == null || methodName.endsWith("Z")) {
 //    				logger.warn("method name is null. ");
@@ -618,10 +617,6 @@ public class SpecMiningUtils {
     			if (needToChangeInitToClassName && methodName.contains("init")) {
     				String className = objectToTrace.getClassName();
     						
-    				if (className.contains("List")) {
-    					logger.warn("We have a list! methodName:" + methodName);
-    				}
-    				
     				// convert <init> constructor to the class name
 //    				String[] nameWithoutFQ = Properties.TARGET_CLASS.split("\\.");
 //    				String ctorName = nameWithoutFQ[nameWithoutFQ.length - 1];
@@ -637,14 +632,6 @@ public class SpecMiningUtils {
     			if (isCtor) {
     				knownCtor.add(methodName);
     			}
-    			
-    			if (methodName.contains("update")) {
-    				logger.warn("has update" );
-    				hasUpdate = true;
-    			} else if (hasUpdate && methodName.contains("initVerify")) {
-    				logger.warn("update then initVerify : " + test);
-    			}
-    			
     		}
     		
     		
@@ -781,8 +768,6 @@ public class SpecMiningUtils {
 //		for (BufferedWriter writer : classTracesWriter.values()) {
 //			writer.write("====\n");
 //		}
-		logger.warn("everything after this is for writing the traces of the FINAL test suite");
-		logger.warn("DYNAMOSA number of times calculated fitness: " + MultiCriteriaManager.numberOfTimesCalucaltedFitness);
 	}
 	
 	private static boolean isInternal(String event) {

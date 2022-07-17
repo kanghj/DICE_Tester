@@ -38,9 +38,7 @@ public class SpecMiningTraceReporter implements SearchListener {
 	public static final boolean isEnabled = false;
 	
 	@Override
-	public void searchStarted(GeneticAlgorithm<?> algorithm) {
-		// TODO Auto-generated method stub
-		
+	public void searchStarted(GeneticAlgorithm<?> algorithm) {		
 	}
 
 	@Override
@@ -49,7 +47,6 @@ public class SpecMiningTraceReporter implements SearchListener {
 			return;
 		}
 		
-		// TODO Auto-generated method stub
 		List<ExecutionResult> results = new ArrayList<>();
 		List<Boolean> hasLeaks = new ArrayList<>();
 		
@@ -145,7 +142,6 @@ public class SpecMiningTraceReporter implements SearchListener {
 
 	@Override
 	public void searchFinished(GeneticAlgorithm<?> algorithm) {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -159,7 +155,6 @@ public class SpecMiningTraceReporter implements SearchListener {
 
 	@Override
 	public void modification(Chromosome individual) {
-		// TODO Auto-generated method stub
 		
 	}
 	
